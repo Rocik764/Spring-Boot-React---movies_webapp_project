@@ -1,51 +1,42 @@
-import React from "react";
-import MovieService from "../../service/MovieService";
-import {Button, Col, Form, Row} from "react-bootstrap";
+import React, {useEffect, useState} from "react";
+import {Button, Col, Container, Form, Row} from "react-bootstrap";
 import AdminMovieService from "../../service/admin/AdminMovieService";
+import {connect} from "react-redux";
+import {setMovie} from "../../actions/adminMoviesAction";
 
-export default class EditMovies extends React.Component {
+function EditMovies(props) {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            id: '',
-            title: '',
-            description: '',
-            category: '',
-            url: ''
-        }
+    const [id, setId] = useState(props.movie.id)
+    const [title, setTitle] = useState(props.movie.title)
+    const [description, setDescription] = useState(props.movie.description)
+    const [category, setCategory] = useState(props.movie.category)
+    const [file, setFile] = useState(props.movie.file)
+    const [url, setUrl] = useState(props.movie.url)
 
-        this.handleTitle = this.handleTitle.bind(this);
-        this.handleDescription = this.handleDescription.bind(this);
-        this.handleImage = this.handleImage.bind(this);
-        this.handleCategory = this.handleCategory.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+    const handleTitle = e => {
+        setTitle(e.target.value)
     }
 
-    handleTitle(event) {
-        this.setState({title: event.target.value})
+    const handleDescription = e => {
+        setDescription(e.target.value)
     }
 
-    handleDescription(event) {
-        this.setState({description: event.target.value})
+    const handleCategory = e => {
+        setCategory(e.target.value)
     }
 
-    handleCategory(event) {
-        this.setState({category: event.target.value})
+    const handleImage = e => {
+        setFile(e.target.files[0])
     }
 
-    handleImage(event) {
-        this.setState({file: event.target.files[0]})
-    }
-
-    handleSubmit(event) {
-        event.preventDefault()
+    const handleSubmit = e => {
+        e.preventDefault()
         let formData = new FormData()
-        formData.append('id', this.state.id)
-        formData.append('title', this.state.title)
-        formData.append('description', this.state.description)
-        formData.append('category', this.state.category)
-        formData.append('file', this.state.file)
+        formData.append('id', id)
+        formData.append('title', title)
+        formData.append('description', description)
+        formData.append('category', category)
+        formData.append('file', file)
 
         AdminMovieService.editMovie(formData).then(
             (response) => {
@@ -55,45 +46,25 @@ export default class EditMovies extends React.Component {
             })
     }
 
-    componentDidMount() {
-        if(!this.props.location.id) return
-        MovieService.getMovie(this.props.location.id).then(
-            response => {
-
-                this.setState({
-                    id: this.props.location.id,
-                    title: response.data.title,
-                    description: response.data.description,
-                    category: response.data.category,
-                    url: response.data.url
-                })
-            },
-            error => {
-                console.log("XD")
-            }
-        )
-    }
-
-    render() {
-
-        return (
+    return (
+        <Container>
             <Row className="pt-5">
                 <Col>
-                    <img src={this.state.url} alt={this.state.title} />
+                    <img src={url} width={500} height={700} alt={title} />
                 </Col>
                 <Col>
-                    <Form onSubmit={this.handleSubmit}>
+                    <Form onSubmit={handleSubmit}>
                         <Form.Group>
                             <Form.Label>Title</Form.Label>
-                            <Form.Control type="text" placeholder="Title" value={this.state.title} onChange={this.handleTitle} />
+                            <Form.Control type="text" placeholder="Title" value={title} onChange={handleTitle} />
                         </Form.Group>
                         <Form.Group>
                             <Form.Label>Description</Form.Label>
-                            <Form.Control as="textarea" rows={3} value={this.state.description} onChange={this.handleDescription} />
+                            <Form.Control as="textarea" rows={3} value={description} onChange={handleDescription} />
                         </Form.Group>
                         <Form.Group controlId="exampleForm.ControlSelect2">
                             <Form.Label>Category</Form.Label>
-                            <Form.Control as="select" value={this.state.category} onChange={this.handleCategory}>
+                            <Form.Control as="select" value={category} onChange={handleCategory}>
                                 <option value="Documentaries">Documentaries</option>
                                 <option value="Family">Family</option>
                                 <option value="Fantasy">Fantasy</option>
@@ -105,7 +76,7 @@ export default class EditMovies extends React.Component {
                             </Form.Control>
                         </Form.Group>
                         <Form.Group>
-                            <Form.File id="file" label="Image" onChange={this.handleImage} />
+                            <Form.File id="file" label="Image" onChange={handleImage} />
                         </Form.Group>
                         <Button variant="primary" type="submit">
                             Submit
@@ -113,6 +84,15 @@ export default class EditMovies extends React.Component {
                     </Form>
                 </Col>
             </Row>
-        )
-    }
+        </Container>
+    )
 }
+
+function mapStateToProps(state) {
+    const { movie } = state.adminMoviesReducer;
+    return {
+        movie
+    };
+}
+
+export default connect(mapStateToProps)(EditMovies);

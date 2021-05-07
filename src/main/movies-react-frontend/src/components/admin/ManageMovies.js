@@ -1,10 +1,11 @@
 import React from "react";
-import {Form, Button, Col, Row, Accordion, Card, Table} from 'react-bootstrap'
-import { Link } from "react-router-dom";
+import {Form, Button, Col, Row, Accordion, Card, Table, Container} from 'react-bootstrap'
 import MovieService from "../../service/MovieService";
 import AdminMovieService from "../../service/admin/AdminMovieService";
+import {setMovie} from "../../actions/adminMoviesAction";
+import {connect} from "react-redux";
 
-export default class ManageMovies extends React.Component {
+class ManageMovies extends React.Component {
 
     constructor(props) {
         super(props);
@@ -67,6 +68,16 @@ export default class ManageMovies extends React.Component {
         )
     }
 
+    setMovie(id) {
+        const { dispatch } = this.props;
+        dispatch(setMovie(id)).then(
+            () => {
+                this.props.history.push("/editMovie");
+                window.location.reload();
+            }
+        )
+    }
+
     render() {
 
         let movies = []
@@ -99,11 +110,7 @@ export default class ManageMovies extends React.Component {
                                             <td>{element.category}</td>
                                             <td><img src={element.url} alt={element.title} width={100} height={100}/></td>
                                             <td>
-                                                <Link to={{
-                                                    pathname:'/editMovie/:id',
-                                                    id: element.id,
-                                                    }}
-                                                    className="btn btn-primary">Edit</Link>
+                                                <Button variant="danger" onClick={() => this.setMovie(element.id)}>Edit</Button>
                                                 <Button variant="danger" onClick={() => this.deleteMovie(element.id)}>Delete</Button>
                                             </td>
                                         </tr>
@@ -117,33 +124,42 @@ export default class ManageMovies extends React.Component {
         }
 
         return (
-            <>
-            <Row className="pt-5">
-                <Col>
-                    <Form.Group controlId="exampleForm.ControlSelect2">
-                        <Form.Label>Category</Form.Label>
-                        <Form.Control as="select" value={this.state.category} onChange={this.handleCategory}>
-                            <option value="All">All</option>
-                            <option value="Documentaries">Documentaries</option>
-                            <option value="Family">Family</option>
-                            <option value="Fantasy">Fantasy</option>
-                            <option value="Horror">Horror</option>
-                            <option value="Comedies">Comedies</option>
-                            <option value="Action & Adventure">Action & Adventure</option>
-                            <option value="Romantic">Romantic</option>
-                            <option value="Dramas">Dramas</option>
-                        </Form.Control>
-                    </Form.Group>
-                </Col>
-            </Row>
-            <Row>
-                <Col>
-                    <Accordion defaultActiveKey="0">
-                        {movies}
-                    </Accordion>
-                </Col>
-            </Row>
-            </>
+            <Container>
+                <Row className="pt-5">
+                    <Col>
+                        <Form.Group controlId="exampleForm.ControlSelect2">
+                            <Form.Label>Category</Form.Label>
+                            <Form.Control as="select" value={this.state.category} onChange={this.handleCategory}>
+                                <option value="All">All</option>
+                                <option value="Documentaries">Documentaries</option>
+                                <option value="Family">Family</option>
+                                <option value="Fantasy">Fantasy</option>
+                                <option value="Horror">Horror</option>
+                                <option value="Comedies">Comedies</option>
+                                <option value="Action & Adventure">Action & Adventure</option>
+                                <option value="Romantic">Romantic</option>
+                                <option value="Dramas">Dramas</option>
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <Accordion defaultActiveKey="0">
+                            {movies}
+                        </Accordion>
+                    </Col>
+                </Row>
+            </Container>
         )
     }
 }
+
+function mapStateToProps(state) {
+    const { movie } = state.adminMoviesReducer;
+    return {
+        movie
+    };
+}
+
+export default connect(mapStateToProps)(ManageMovies);

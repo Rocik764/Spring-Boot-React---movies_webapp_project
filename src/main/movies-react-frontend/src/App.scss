@@ -1,0 +1,62 @@
+:root {
+  --primary-color: #007af3;
+}
+
+.navbar {
+  background-color: white !important;
+
+  .logo {
+    text-decoration: none;
+    font-weight: bold;
+    color: black;
+    font-size: 1.2em;
+
+    span {
+      color: var(--primary-color);
+    }
+  }
+}
+
+.nav-link {
+  color: black !important;
+  font-size: 1em !important;
+  padding: .1em 1em !important;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.login-register-form {
+  margin: auto;
+  padding: 2em;
+  border: 1px solid grey;
+  border-radius: 10px;
+
+  h1 {
+    font-size: 2.5em;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+
+  .login-register-form {
+    margin: auto;
+    width: 50%;
+    padding: 2em;
+    border: 1px solid grey;
+    border-radius: 10px;
+
+    h1 {
+      font-size: 2.5em;
+    }
+  }
+}
+
+.new_html_code {
+  width:1000px;
+  height:500px;
+  overflow:hidden;
+  display:block;
+  border:1px solid red;
+}

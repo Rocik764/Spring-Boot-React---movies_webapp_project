@@ -1,73 +1,63 @@
-import React from "react";
-import {Form, Button, Col, Row} from 'react-bootstrap'
+import React, {useState} from "react";
+import {Form, Button, Col, Row, Container} from 'react-bootstrap'
 import AdminMovieService from '../../service/admin/AdminMovieService'
 
-export default class AddMovie extends React.Component {
+export default function AddMovie(props) {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            title: '',
-            description: '',
-            file: '',
-            category: ''
-        };
+    const [title, setTitle] = useState('')
+    const [description, setDescription] = useState('')
+    const [file, setFile] = useState('')
+    const [category, setCategory] = useState('')
 
-        this.handleTitle = this.handleTitle.bind(this);
-        this.handleDescription = this.handleDescription.bind(this);
-        this.handleImage = this.handleImage.bind(this);
-        this.handleCategory = this.handleCategory.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+    const handleTitle = e => {
+        setTitle(e.target.value)
     }
 
-    handleTitle(event) {
-        this.setState({title: event.target.value})
+    const handleDescription = e => {
+        setDescription(e.target.value)
     }
 
-    handleDescription(event) {
-        this.setState({description: event.target.value})
+    const handleCategory = e => {
+        setCategory(e.target.value)
     }
 
-    handleCategory(event) {
-        this.setState({category: event.target.value})
+    const handleImage = e => {
+        setFile(e.target.files[0])
     }
 
-    handleImage(event) {
-        this.setState({file: event.target.files[0]})
-    }
-
-    handleSubmit(event) {
-        event.preventDefault()
+    const handleSubmit = e => {
+        e.preventDefault()
         let formData = new FormData()
-        formData.append('title', this.state.title)
-        formData.append('description', this.state.description)
-        formData.append('category', this.state.category)
-        formData.append('file', this.state.file)
+        formData.append('title', title)
+        formData.append('description', description)
+        formData.append('category', category)
+        formData.append('file', file)
 
         AdminMovieService.addMovie(formData).then(
             (response) => {
-                alert(response.data)
+                props.history.push("/list");
+                window.location.reload();
             }, error => {
                 alert(error.response.data)
             })
     }
 
-    render() {
-        return (
+    return (
+        <Container>
             <Row className="pt-5">
                 <Col>
-                    <Form onSubmit={this.handleSubmit}>
+                    <Form onSubmit={handleSubmit}>
                         <Form.Group>
                             <Form.Label>Title</Form.Label>
-                            <Form.Control type="text" placeholder="Title" value={this.state.title} onChange={this.handleTitle} />
+                            <Form.Control type="text" placeholder="Title" value={title} onChange={handleTitle} />
                         </Form.Group>
                         <Form.Group>
                             <Form.Label>Description</Form.Label>
-                            <Form.Control as="textarea" rows={3} value={this.state.description} onChange={this.handleDescription} />
+                            <Form.Control as="textarea" rows={3} value={description} onChange={handleDescription} />
                         </Form.Group>
                         <Form.Group controlId="exampleForm.ControlSelect2">
                             <Form.Label>Category</Form.Label>
-                            <Form.Control as="select" value={this.state.category} onChange={this.handleCategory}>
+                            <Form.Control as="select" value={category} onChange={handleCategory}>
                                 <option value="Documentaries">Documentaries</option>
                                 <option value="Family">Family</option>
                                 <option value="Fantasy">Fantasy</option>
@@ -79,7 +69,7 @@ export default class AddMovie extends React.Component {
                             </Form.Control>
                         </Form.Group>
                         <Form.Group>
-                            <Form.File id="file" label="Image" onChange={this.handleImage} />
+                            <Form.File id="file" label="Image" onChange={handleImage} />
                         </Form.Group>
                         <Button variant="primary" type="submit">
                             Submit
@@ -87,6 +77,6 @@ export default class AddMovie extends React.Component {
                     </Form>
                 </Col>
             </Row>
-        )
-    }
+        </Container>
+    )
 }

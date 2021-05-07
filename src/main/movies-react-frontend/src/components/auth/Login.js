@@ -1,70 +1,77 @@
-import React from "react";
-import {Form, Button, Col, Row} from 'react-bootstrap'
-import AuthService from "../../service/AuthService";
+import React, {useState} from "react";
+import {Form, Button, Col, Row, Container} from 'react-bootstrap'
+import { Redirect } from "react-router-dom";
+import { connect } from "react-redux";
+import { login } from "../../actions/auth";
 
-export default class Login extends React.Component {
+function Login(props) {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            name: '',
-            password: '',
-            message: ''
-        };
+    const [name, setName] = useState('')
+    const [password, setPassword] = useState('')
 
-        this.handleName = this.handleName.bind(this)
-        this.handlePassword = this.handlePassword.bind(this)
-        this.handleSubmit = this.handleSubmit.bind(this)
+    const handleName = e => {
+        setName(e.target.value)
     }
 
-    handleName(event) {
-        this.setState({name: event.target.value})
+    const handlePassword = e => {
+        setPassword(e.target.value)
     }
 
-    handlePassword(event) {
-        this.setState({password: event.target.value})
-    }
-
-    handleSubmit(event) {
-        event.preventDefault()
-        AuthService.login(this.state.name, this.state.password).then(
-            (response) => {
-                this.props.history.push("/list");
+    const handleSubmit = e => {
+        e.preventDefault()
+        const { dispatch } = props;
+        dispatch(login(name, password)).then(
+            () => {
+                props.history.push("/list");
                 window.location.reload();
-            },
-            error => {
-                console.log(error.response)
-                this.setState({
-                    message: error.response.data
-                });
             }
         )
     }
 
-    render() {
-        return (
-            <Row>
+    const { isLoggedIn, message } = props;
+
+    if (isLoggedIn) {
+        return <Redirect to="/list" />;
+    }
+
+    return (
+        <Container>
+            <Row className="pt-5">
                 <Col>
-                    <Form onSubmit={this.handleSubmit}>
-                        <Form.Group>
-                            <Form.Label>Name</Form.Label>
-                            <Form.Control type="text" placeholder="Enter name" value={this.state.name} onChange={this.handleName} />
-                        </Form.Group>
-                        <Form.Group>
-                            <Form.Label>Password</Form.Label>
-                            <Form.Control type="password" placeholder="Password" value={this.state.password} onChange={this.handlePassword} />
-                        </Form.Group>
-                        <Button variant="primary" type="submit">
-                            Login
-                        </Button>
-                    </Form>
-                    {this.state.message && (
-                        <div className="alert alert-danger" role="alert">
-                            {this.state.message}
-                        </div>
-                    )}
+                    <div className="login-register-form">
+                        <h1>Login</h1>
+                        <Form onSubmit={handleSubmit}>
+                            <Form.Group>
+                                <Form.Label>Name</Form.Label>
+                                <Form.Control type="text" placeholder="Enter name" value={name} onChange={handleName} />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Password</Form.Label>
+                                <Form.Control type="password" placeholder="Password" value={password} onChange={handlePassword} />
+                            </Form.Group>
+                            <Button variant="primary" type="submit">
+                                Login
+                            </Button>
+                        </Form>
+                        {message && (
+                            <div className="alert alert-danger" role="alert">
+                                {message}
+                            </div>
+                        )}
+                    </div>
                 </Col>
             </Row>
-        );
-    }
+        </Container>
+    );
 }
+
+function mapStateToProps(state) {
+    const { isLoggedIn } = state.auth;
+    const { message } = state.message;
+    return {
+        isLoggedIn,
+        message
+    };
+}
+
+export default connect(mapStateToProps)(Login);

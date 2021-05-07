@@ -1,29 +1,42 @@
-import './App.css';
+import './App.scss';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Navbar, Nav, Container, NavDropdown} from "react-bootstrap";
 import React, {Component} from "react";
-import { Link, Switch, Route } from "react-router-dom";
+import { Router, Link, Switch, Route } from "react-router-dom";
+import { connect } from "react-redux";
+
 import AddMovie from './components/admin/AddMovie'
 import MoviesList from "./components/movies_list/MoviesList";
-import AuthService from './service/AuthService'
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import ManageMovies from "./components/admin/ManageMovies";
 import EditMovies from "./components/admin/EditMovies";
 
+import { clearMessage } from "./actions/message";
+import { logout } from "./actions/auth";
+
+import { history } from './helpers/history'
+import MainPage from "./components/pages/MainPage";
+import MovieDetails from "./components/pages/MovieDetails";
+
 class App extends Component {
     constructor(props) {
         super(props);
+        this.logOut = this.logOut.bind(this);
 
         this.state = {
             showModeratorBoard: false,
             showAdminBoard: false,
             currentUser: undefined,
         };
+
+        history.listen((location) => {
+            props.dispatch(clearMessage()); // clear message when changing location
+        });
     }
 
     componentDidMount() {
-        const user = AuthService.getCurrentUser();
+        const user = this.props.user;
 
         if (user) {
             this.setState({
@@ -35,20 +48,21 @@ class App extends Component {
     }
 
     logOut() {
-        AuthService.logout();
+        this.props.dispatch(logout());
     }
 
     render() {
-        const { currentUser } = this.state;
-        const { showAdminBoard } = this.state;
+        const { currentUser, showAdminBoard } = this.state;
 
         return (
-            <>
-                <Navbar bg="light" expand="lg">
-                    <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand>
+            <Router history={history}>
+                <Navbar expand="lg">
+                    <Container>
+                    <Navbar.Brand href="/home" className="logo">Movies<span>Forum</span></Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
                         {currentUser ? (
+                            <>
                             <Nav className="mr-auto">
                                 {showAdminBoard ? (
                                     <NavDropdown title="ADMIN" id="basic-nav-dropdown">
@@ -61,10 +75,13 @@ class App extends Component {
                                     <></>
                                 )}
                                 <Nav.Link as={Link} to={"/list"}>Movies list</Nav.Link>
+                            </Nav>
+                            <Nav>
                                 <Nav.Item>
                                     <a href="/login" className="nav-link" onClick={this.logOut}>Logout</a>
                                 </Nav.Item>
                             </Nav>
+                            </>
                         ) : (
                             <>
                             <Nav className="mr-auto">
@@ -81,32 +98,42 @@ class App extends Component {
                             </>
                         )}
                     </Navbar.Collapse>
+                    </Container>
                 </Navbar>
-                <Container>
-                    <Switch>
-                        {currentUser ? (
-                            <>
+                <Switch>
+                    {currentUser ? (
+                        <>
+                            <Route exact path="/home" component={MainPage} />
                             <Route exact path="/list" component={MoviesList} />
-                            {showAdminBoard ? (
-                            <>
+                            <Route exact path="/movieDetails" component={MovieDetails} />
+                        {showAdminBoard ? (
+                        <>
                             <Route exact path="/addMovie" component={AddMovie} />
                             <Route exact path="/manageMovies" component={ManageMovies} />
-                            <Route exact path='/editMovie/:id/' component={EditMovies} />
-                            </>
-                            ) : (<></>)}
-                            </>
-                        ) : (
-                            <>
+                            <Route exact path='/editMovie' component={EditMovies} />
+                        </>
+                        ) : (<></>)}
+                        </>
+                    ) : (
+                        <>
+                            <Route exact path="/home" component={MainPage} />
                             <Route exact path="/list" component={MoviesList} />
+                            <Route exact path="/movieDetails" component={MovieDetails} />
                             <Route exact path="/login" component={Login} />
                             <Route exact path="/register" component={Register} />
-                            </>
-                        )}
-                    </Switch>
-                </Container>
-            </>
+                        </>
+                    )}
+                </Switch>
+            </Router>
         );
     }
 }
 
-export default App;
+function mapStateToProps(state) {
+    const { user } = state.auth;
+    return {
+        user,
+    };
+}
+
+export default connect(mapStateToProps)(App);

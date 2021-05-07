@@ -1,22 +1,24 @@
 import React, {useState} from 'react';
 import './MovieCard.css'
-import MovieCardModal from './MovieCardModal';
+import {setMovie} from "../../actions/adminMoviesAction";
+import {connect} from "react-redux";
+import { history } from '../../helpers/history'
 
-const MovieCard = ({title, description, url}) => {
+const MovieCard = ({id, title, url, dispatch}) => {
 
-    const [isOpen, setIsOpen] = useState(false);
-
-    const showModal = () => {
-        setIsOpen(true);
-    };
-
-    const hideModal = () => {
-        setIsOpen(false);
-    };
+    function showMovie(id) {
+        dispatch(setMovie(id)).then(
+            () => {
+                console.log("XD")
+                history.push("/movieDetails");
+                window.location.reload();
+            }
+        )
+    }
 
     return(
         <>
-            <div className="movie-card-container" onClick={showModal}>
+            <div className="movie-card-container" onClick={() => showMovie(id)}>
                 <img className="movie-card-image" src={url} alt="some img"/>
                 <div className="card-img-overlay d-flex flex-column justify-content-end text-center">
                     <div className="movie-card-shadow">
@@ -24,9 +26,15 @@ const MovieCard = ({title, description, url}) => {
                     </div>
                 </div>
             </div>
-            <MovieCardModal showModal={isOpen} hideModal = {hideModal} title={title} description={description} url={url}/>
         </>
     );
 }
 
-export default MovieCard
+function mapStateToProps(state) {
+    const { movie } = state.adminMoviesReducer;
+    return {
+        movie
+    };
+}
+
+export default connect(mapStateToProps)(MovieCard);

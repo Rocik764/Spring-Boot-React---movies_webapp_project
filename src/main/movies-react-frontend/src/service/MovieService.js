@@ -14,7 +14,7 @@ class MovieService {
     }
 
     getMovie(id) {
-        return axios.get(API_URL + 'get/' + id, {headers: authHeader()})
+        return axios.get(API_URL + 'get/' + id, {headers: authHeader()}).then()
     }
 }
 
