@@ -6,7 +6,7 @@ const API_URL = 'http://localhost:8080/api/admin/'
 class AdminMovieService {
 
     addMovie(formData) {
-        return axios.post(API_URL + 'add', formData, {headers: authHeader()})
+        return axios.post(API_URL + 'add', formData, {headers: authHeader(), "Content-Type": undefined})
     }
 
     deleteMovie(id) {

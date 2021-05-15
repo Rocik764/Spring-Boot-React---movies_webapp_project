@@ -1,11 +1,11 @@
 package com.example.springbootmongodb.service;
 
-import com.example.springbootmongodb.model.Comment;
-import com.example.springbootmongodb.model.Movie;
-import com.example.springbootmongodb.model.Rate;
-import com.example.springbootmongodb.model.User;
+import com.example.springbootmongodb.model.*;
 import com.example.springbootmongodb.respository.MovieRepository;
 import com.example.springbootmongodb.respository.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.bson.types.ObjectId;
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.NoSuchElementException;
 
 @Service
@@ -40,25 +41,38 @@ public class MovieService {
     @Value("${app.hyperlink}")
     private String hyperLink;
 
-    public String addMovie(String title, String description, String category, MultipartFile file) {
-        if(title == null || title.isBlank()) return "Missing title";
-        if(description == null || description.isBlank()) return "Missing description";
-        if(file == null || file.isEmpty()) return "Missing file";
-        if(!checkExtension(file)) return "Only .png/.jpg/.jpeg allowed";
-        if(!checkCategory(category)) return "There's no such category";
+    public ResponseEntity<String> addMovie(String title,
+                                           String description,
+                                           String category,
+                                           MultipartFile file,
+                                           String[] directorsList,
+                                           String actorsList) throws JsonProcessingException {
+        if(title == null || title.isBlank()) return ResponseEntity.badRequest().body("Missing title");
+        if(description == null || description.isBlank()) return ResponseEntity.badRequest().body("Missing description");
+        if(file == null || file.isEmpty()) return ResponseEntity.badRequest().body("Missing file");
+        if(!checkExtension(file)) return ResponseEntity.badRequest().body("Only .png/.jpg/.jpeg allowed");
+        if(!checkCategory(category)) return ResponseEntity.badRequest().body("There's no such category");
+        if(directorsList == null) return ResponseEntity.badRequest().body("Please enter atleast 1 director");
+        if (actorsList == null || actorsList.isBlank()) return ResponseEntity.badRequest().body("Please enter atleast 1 actor");
+
+        Collection<Actor> deserializedActorsList = new ObjectMapper().readValue(
+                actorsList, new TypeReference<>() {
+                }
+        );
 
         try {
             Movie movie = new Movie();
             movie.setTitle(title);
             movie.setDescription(description);
             movie.setCategory(category);
-            if (test(title, file, movie)) return "File has no content";
-
+            for (String director : directorsList) movie.addDirector(director);
+            for (Actor actor : deserializedActorsList) movie.addActor(actor);
+            if (checkContext(title, file, movie)) return ResponseEntity.badRequest().body("File has no content");
         } catch (Exception e) {
-            return "Something went wrong";
+            return ResponseEntity.badRequest().body("Something went wrong");
         }
 
-        return "Movie uploaded successfully";
+        return ResponseEntity.ok("Movie uploaded successfully");
     }
 
     public String editMovie(String id, String title, String description, String category, MultipartFile file) {
@@ -77,7 +91,7 @@ public class MovieService {
                 if(!checkExtension(file)) return "Only .png/.jpg/.jpeg allowed";
                 String movieId = movie.getUrl().split(hyperLink + "api/file/movies/")[1];
                 gridFsTemplate.delete(new Query(Criteria.where("_id").is(movieId)));
-                if (test(title, file, movie)) return "File has no content";
+                if (checkContext(title, file, movie)) return "File has no content";
             }
         } catch (NoSuchElementException | IOException exception) {
             return "Movie not found";
@@ -86,7 +100,7 @@ public class MovieService {
         return "Movie updated successfully";
     }
 
-    private boolean test(String title, MultipartFile file, Movie movie) throws IOException {
+    private boolean checkContext(String title, MultipartFile file, Movie movie) throws IOException {
         DBObject metaData = new BasicDBObject();
         metaData.put("title", title);
         try {

@@ -57,7 +57,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/api/auth/register",
                         "/api/movie/list",
                         "/api/movie/list/**",
-                        "/api/file/**")
+                        "/api/file/**",
+                        "/api/test/**")
                 .permitAll()
 
                 .antMatchers("/api/movie/add",

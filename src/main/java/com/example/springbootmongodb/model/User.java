@@ -4,6 +4,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,8 +15,12 @@ public class User {
 
     @Id
     private String id;
+    @NotNull
+    @Size(min = 2, max = 255)
     @Indexed(unique = true)
     private String name;
+    @NotNull
+    @Size(min = 6, max = 255)
     private String password;
     private String roles;
 

@@ -13,12 +13,18 @@ public class Movie {
     private String id;
     private String title;
     private String description;
+    private List<String> directors = new ArrayList<>();
     private String url;
     private String category;
     private List<Rate> rates = new ArrayList<>();
     private List<Comment> comments = new ArrayList<>();
+    private List<Actor> actors = new ArrayList<>();
 
-    public Movie(String id, String title, String description, String url, String category) {
+    public Movie(String id,
+                 String title,
+                 String description,
+                 String url,
+                 String category) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -52,6 +58,14 @@ public class Movie {
         this.description = description;
     }
 
+    public List<String> getDirectors() {
+        return directors;
+    }
+
+    public void addDirector(String director) {
+        this.directors.add(director);
+    }
+
     public String getUrl() {
         return url;
     }
@@ -82,5 +96,13 @@ public class Movie {
 
     public void addComment(Comment comment) {
         this.comments.add(comment);
+    }
+
+    public List<Actor> getActors() {
+        return actors;
+    }
+
+    public void addActor(Actor actor) {
+        this.actors.add(actor);
     }
 }
