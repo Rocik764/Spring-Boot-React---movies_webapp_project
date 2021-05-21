@@ -1,17 +1,18 @@
-import React, {useEffect, useState} from "react";
-import {Button, Col, Container, Form, Row} from "react-bootstrap";
+import React, { useState } from "react";
+import { Button, Col, Container, Form, InputGroup, Row } from "react-bootstrap";
 import AdminMovieService from "../../service/admin/AdminMovieService";
-import {connect} from "react-redux";
-import {setMovie} from "../../actions/adminMoviesAction";
 
-function EditMovies(props) {
+export default function EditMovies(props) {
 
-    const [id, setId] = useState(props.movie.id)
-    const [title, setTitle] = useState(props.movie.title)
-    const [description, setDescription] = useState(props.movie.description)
-    const [category, setCategory] = useState(props.movie.category)
-    const [file, setFile] = useState(props.movie.file)
-    const [url, setUrl] = useState(props.movie.url)
+    const [movie, setMovie] = useState(JSON.parse(localStorage.getItem("movie")))
+    const [id, setId] = useState(movie.id)
+    const [title, setTitle] = useState(movie.title)
+    const [description, setDescription] = useState(movie.description)
+    const [category, setCategory] = useState(movie.category)
+    const [file, setFile] = useState(movie.file)
+    const [url, setUrl] = useState(movie.url)
+    const [directorsList, setDirectorsList] = useState(movie.directors);
+    const [actorsList, setActorsList] = useState(movie.actors);
 
     const handleTitle = e => {
         setTitle(e.target.value)
@@ -29,6 +30,20 @@ function EditMovies(props) {
         setFile(e.target.files[0])
     }
 
+    const handleInputChange = (e, index) => {
+        const value = e.target.value;
+        const list = [...directorsList];
+        list[index] = value;
+        setDirectorsList(list);
+    }
+
+    const handleActorsInputChange = (e, index) => {
+        const { name, value } = e.target;
+        const list = [...actorsList];
+        list[index][name] = value;
+        setActorsList(list);
+    }
+
     const handleSubmit = e => {
         e.preventDefault()
         let formData = new FormData()
@@ -37,11 +52,17 @@ function EditMovies(props) {
         formData.append('description', description)
         formData.append('category', category)
         formData.append('file', file)
+        for (let i = 0; i < directorsList.length; i++) {
+            formData.append('directorsList[]', directorsList[i])
+        }
+        formData.append('actorsList', JSON.stringify(actorsList))
 
         AdminMovieService.editMovie(formData).then(
-            (response) => {
-                alert(response.data)
+            () => {
+                props.history.push("/manageMovies");
+                window.location.reload();
             }, error => {
+                console.log("XD")
                 alert(error.response.data)
             })
     }
@@ -78,6 +99,29 @@ function EditMovies(props) {
                         <Form.Group>
                             <Form.File id="file" label="Image" onChange={handleImage} />
                         </Form.Group>
+                        <Form.Label className="pt-2">Directors</Form.Label>
+                        {directorsList.map((x, i) => {
+                            console.log(x)
+                            return (
+                                <div key={i}>
+                                    <InputGroup className="mb-3">
+                                        <Form.Control name="director" type="text" value={x} onChange={e => handleInputChange(e, i)} />
+                                    </InputGroup>
+                                </div>
+                            );
+                        })}
+                        <Form.Label className="pt-4">Actors</Form.Label>
+                        {actorsList.map((x, i) => {
+                            return (
+                                <div key={i}>
+                                    <InputGroup className="mb-3">
+                                        <Form.Control name="name" type="text" placeholder="Name" value={x.name} onChange={e => handleActorsInputChange(e, i)} />
+                                        <Form.Control name="second_name" type="text" placeholder="Last name" value={x.second_name} onChange={e => handleActorsInputChange(e, i)} />
+                                        <Form.Control name="role" type="text" placeholder="Role" value={x.role} onChange={e => handleActorsInputChange(e, i)} />
+                                    </InputGroup>
+                                </div>
+                            );
+                        })}
                         <Button variant="primary" type="submit">
                             Submit
                         </Button>
@@ -88,11 +132,3 @@ function EditMovies(props) {
     )
 }
 
-function mapStateToProps(state) {
-    const { movie } = state.adminMoviesReducer;
-    return {
-        movie
-    };
-}
-
-export default connect(mapStateToProps)(EditMovies);

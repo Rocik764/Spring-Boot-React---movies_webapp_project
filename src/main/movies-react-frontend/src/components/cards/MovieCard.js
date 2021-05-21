@@ -1,17 +1,20 @@
-import React, {useState} from 'react';
+import React from 'react';
 import './MovieCard.css'
-import {setMovie} from "../../actions/adminMoviesAction";
 import {connect} from "react-redux";
 import { history } from '../../helpers/history'
+import MovieService from "../../service/MovieService";
 
 const MovieCard = ({id, title, url, dispatch}) => {
 
     function showMovie(id) {
-        dispatch(setMovie(id)).then(
-            () => {
-                console.log("XD")
+        MovieService.getMovie(id).then(
+            (response) => {
+                localStorage.setItem("movie", JSON.stringify(response.data));
                 history.push("/movieDetails");
                 window.location.reload();
+            },
+            (error) => {
+                alert(error.response.data)
             }
         )
     }
@@ -30,11 +33,4 @@ const MovieCard = ({id, title, url, dispatch}) => {
     );
 }
 
-function mapStateToProps(state) {
-    const { movie } = state.adminMoviesReducer;
-    return {
-        movie
-    };
-}
-
-export default connect(mapStateToProps)(MovieCard);
+export default MovieCard

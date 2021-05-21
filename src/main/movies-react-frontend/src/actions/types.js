@@ -5,7 +5,6 @@ const LOGIN_FAIL = "LOGIN_FAIL";
 const LOGOUT = "LOGOUT";
 const SET_MESSAGE = "SET_MESSAGE";
 const CLEAR_MESSAGE = "CLEAR_MESSAGE";
-const SET_MOVIE = "SET_MOVIE";
 
 export default {
     REGISTER_SUCCESS,
@@ -14,6 +13,5 @@ export default {
     LOGIN_FAIL,
     LOGOUT,
     SET_MESSAGE,
-    CLEAR_MESSAGE,
-    SET_MOVIE
+    CLEAR_MESSAGE
 }

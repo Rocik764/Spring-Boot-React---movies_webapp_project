@@ -2,10 +2,9 @@ import React from "react";
 import {Form, Button, Col, Row, Accordion, Card, Table, Container} from 'react-bootstrap'
 import MovieService from "../../service/MovieService";
 import AdminMovieService from "../../service/admin/AdminMovieService";
-import {setMovie} from "../../actions/adminMoviesAction";
-import {connect} from "react-redux";
+import {history} from "../../helpers/history";
 
-class ManageMovies extends React.Component {
+export default class ManageMovies extends React.Component {
 
     constructor(props) {
         super(props);
@@ -69,11 +68,14 @@ class ManageMovies extends React.Component {
     }
 
     setMovie(id) {
-        const { dispatch } = this.props;
-        dispatch(setMovie(id)).then(
-            () => {
-                this.props.history.push("/editMovie");
+        MovieService.getMovie(id).then(
+            (response) => {
+                localStorage.setItem("movie", JSON.stringify(response.data));
+                history.push("/editMovie");
                 window.location.reload();
+            },
+            (error) => {
+                alert(error.response.data)
             }
         )
     }
@@ -154,12 +156,3 @@ class ManageMovies extends React.Component {
         )
     }
 }
-
-function mapStateToProps(state) {
-    const { movie } = state.adminMoviesReducer;
-    return {
-        movie
-    };
-}
-
-export default connect(mapStateToProps)(ManageMovies);

@@ -16,6 +16,11 @@ class MovieService {
     getMovie(id) {
         return axios.get(API_URL + 'get/' + id, {headers: authHeader()}).then()
     }
+
+    postComment(id, formData) {
+        return axios.post(API_URL + 'comment/' + id, formData,{headers: authHeader()}
+        )
+    }
 }
 
 export default new MovieService()
