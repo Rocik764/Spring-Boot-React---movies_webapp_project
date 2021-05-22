@@ -19,6 +19,8 @@ class AuthService {
 
     logout() {
         localStorage.removeItem("user");
+        localStorage.removeItem("movie");
+        localStorage.removeItem("movieId");
     }
 
     register(name, password) {

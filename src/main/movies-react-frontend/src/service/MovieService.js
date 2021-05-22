@@ -18,8 +18,17 @@ class MovieService {
     }
 
     postComment(id, formData) {
-        return axios.post(API_URL + 'comment/' + id, formData,{headers: authHeader()}
-        )
+        return axios.post(API_URL + 'comment/' + id, formData,{headers: authHeader()})
+    }
+
+    rateMovie(id, userId, rate) {
+        return axios.patch(API_URL + 'rate/' + id, null,{
+            params: {
+                userId: userId,
+                rate: rate
+            },
+            headers: authHeader()
+        })
     }
 }
 

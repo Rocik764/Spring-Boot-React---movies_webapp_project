@@ -2,20 +2,43 @@ import React, {useEffect, useState} from "react";
 import {Button, Col, Container, Form, Row, Table, ListGroup} from 'react-bootstrap'
 import {connect} from "react-redux";
 import MovieService from "../../service/MovieService";
+import Rate from 'react-star-rating-component';
 
 function MovieDetails(props) {
 
     const [comment, setComment] = useState('')
     const [movie, setMovie] = useState(JSON.parse(localStorage.getItem("movie")))
+    const [rate, setRate] = useState(1)
+
+    React.useEffect(() => {
+        let finalRate = 0
+        for(let i = 0; movie.rates.length > i; i++) {
+            finalRate += movie.rates[i].rate
+            console.log(movie.rates[i].rate)
+        }
+        finalRate = finalRate / movie.rates.length
+        setRate(finalRate)
+        console.log(finalRate)
+    }, [])
 
     const handleComment = e => {
         setComment(e.target.value)
     }
 
-    useEffect(() => {
+    const onStarClick = e => {
+        MovieService.rateMovie(movie.id, props.user.user.id, rate).then(
+            (response) => {
+                alert(response.data)
+            },
+            (error) => {
+                alert(error.response.data)
+            }
+        )
+    }
 
-
-    }, [])
+    const onStarHover = e => {
+        setRate(e)
+    }
 
     const handleSubmit = e => {
         e.preventDefault()
@@ -77,6 +100,15 @@ function MovieDetails(props) {
                 </Col>
                 <Col md={6}>
                     <h1>{movie.title}</h1>
+                    <div style={{fontSize: 34}}>
+                    <Rate
+                        name="rate1"
+                        starCount={5}
+                        value={rate}
+                        onStarClick={onStarClick}
+                        onStarHover={onStarHover}
+                    />
+                    </div>
                     <p>{movie.description}</p>
                     <h4>Directors</h4>
                     {directors.length !== 0 ? (

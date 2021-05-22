@@ -67,17 +67,20 @@ export default class ManageMovies extends React.Component {
         )
     }
 
-    setMovie(id) {
-        MovieService.getMovie(id).then(
-            (response) => {
-                localStorage.setItem("movie", JSON.stringify(response.data));
-                history.push("/editMovie");
-                window.location.reload();
-            },
-            (error) => {
-                alert(error.response.data)
-            }
-        )
+    setMovie(movie) {
+        localStorage.setItem("movie", JSON.stringify(movie));
+        history.push("/editMovie");
+        window.location.reload();
+        // MovieService.getMovie(id).then(
+        //     (response) => {
+        //         localStorage.setItem("movie", JSON.stringify(response.data));
+        //         history.push("/editMovie");
+        //         window.location.reload();
+        //     },
+        //     (error) => {
+        //         alert(error.response.data)
+        //     }
+        // )
     }
 
     render() {
@@ -112,7 +115,7 @@ export default class ManageMovies extends React.Component {
                                             <td>{element.category}</td>
                                             <td><img src={element.url} alt={element.title} width={100} height={100}/></td>
                                             <td>
-                                                <Button variant="danger" onClick={() => this.setMovie(element.id)}>Edit</Button>
+                                                <Button variant="danger" onClick={() => this.setMovie(element)}>Edit</Button>
                                                 <Button variant="danger" onClick={() => this.deleteMovie(element.id)}>Delete</Button>
                                             </td>
                                         </tr>

@@ -24,7 +24,7 @@ export default function MainPage(props) {
         movieCards = movies.map((element, i) => {
             return (
                 <Col xl={3} md={4} sm={6} key={i}>
-                    <MovieCard id={element.id} title={element.title} url={element.url} props={props}/>
+                    <MovieCard id={element.id} title={element.title} url={element.url} movie={element} />
                 </Col>
             );
         });
