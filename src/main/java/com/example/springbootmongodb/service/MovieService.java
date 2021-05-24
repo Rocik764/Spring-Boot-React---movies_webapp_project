@@ -10,6 +10,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
@@ -19,7 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Date;
 import java.util.NoSuchElementException;
 
 @Service
@@ -31,11 +36,16 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final GridFsTemplate gridFsTemplate;
     private final UserRepository userRepository;
+    private final MongoOperations mongoOperations;
 
-    public MovieService(MovieRepository movieRepository, GridFsTemplate gridFsTemplate, UserRepository userRepository) {
+    public MovieService(MovieRepository movieRepository,
+                        GridFsTemplate gridFsTemplate,
+                        UserRepository userRepository,
+                        MongoOperations mongoOperations) {
         this.movieRepository = movieRepository;
         this.gridFsTemplate = gridFsTemplate;
         this.userRepository = userRepository;
+        this.mongoOperations = mongoOperations;
     }
 
     @Value("${app.hyperlink}")
@@ -75,29 +85,43 @@ public class MovieService {
         return ResponseEntity.ok("Movie uploaded successfully");
     }
 
-    public String editMovie(String id, String title, String description, String category, MultipartFile file) {
-        if(title == null || title.isBlank()) return "Missing title";
-        if(description == null || description.isBlank()) return "Missing description";
-        if(!checkCategory(category)) return "There's no such category";
+    public ResponseEntity<String> editMovie(String id,
+                                            String title,
+                                            String description,
+                                            String category,
+                                            MultipartFile file,
+                                            String[] directorsList,
+                                            String actorsList) throws JsonProcessingException {
+        if(title == null || title.isBlank()) return ResponseEntity.badRequest().body("Missing title");
+        if(description == null || description.isBlank()) return ResponseEntity.badRequest().body("Missing description");
+        if(!checkCategory(category)) return ResponseEntity.badRequest().body("There's no such category");
 
+        Collection<Actor> deserializedActorsList = new ObjectMapper().readValue(
+                actorsList, new TypeReference<>() {
+                }
+        );
         try {
             Movie movie = movieRepository.findById(id).get();
             movie.setTitle(title);
             movie.setDescription(description);
             movie.setCategory(category);
+            movie.resetActors();
+            movie.resetDirectors();
+            for (String director : directorsList) movie.addDirector(director);
+            for (Actor actor : deserializedActorsList) movie.addActor(actor);
             if(file == null || file.isEmpty()) {
                 movieRepository.save(movie);
             } else {
-                if(!checkExtension(file)) return "Only .png/.jpg/.jpeg allowed";
+                if(!checkExtension(file)) return ResponseEntity.badRequest().body("Only .png/.jpg/.jpeg allowed");
                 String movieId = movie.getUrl().split(hyperLink + "api/file/movies/")[1];
                 gridFsTemplate.delete(new Query(Criteria.where("_id").is(movieId)));
-                if (checkContext(title, file, movie)) return "File has no content";
+                if (checkContext(title, file, movie)) return ResponseEntity.badRequest().body("File has no content");
             }
         } catch (NoSuchElementException | IOException exception) {
-            return "Movie not found";
+            return ResponseEntity.badRequest().body("Movie not found");
         }
 
-        return "Movie updated successfully";
+        return ResponseEntity.ok("Movie updated successfully");
     }
 
     private boolean checkContext(String title, MultipartFile file, Movie movie) throws IOException {
@@ -133,14 +157,22 @@ public class MovieService {
 
     public ResponseEntity rateMovie(String id, String userId, int rate) {
         if(rate > 5 || rate < 1) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The number must be between 1 and 5");
-
+        System.out.println("movie: " + id + " | user: " + " | rate: " + rate);
         try {
             Movie movie = movieRepository.findById(id).get();
             User user = userRepository.findById(userId).get();
+            for (Rate movieRate : movie.getRates()) {
+                String movieUserId = movieRate.getUser().getId();
+                if(movieUserId.equals(user.getId())) {
+                    movieRate.setRate(rate);
+                    movieRepository.save(movie);
+                    return ResponseEntity.ok().body("Changed your rate");
+                }
+            }
             Rate newRate = new Rate(rate, user);
             movie.addRate(newRate);
             movieRepository.save(movie);
-            return ResponseEntity.ok().body("Thanks for rating the movie!");
+            return ResponseEntity.ok().body("Thanks for rating the movie");
         } catch (NoSuchElementException exception) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Movie or user not found");
         } catch (Exception e) {
@@ -153,15 +185,23 @@ public class MovieService {
 
         try {
             Movie movie = movieRepository.findById(id).get();
-            User user = userRepository.findById(userId).get();
-            Comment comment = new Comment(content, user);
+            User user;
+            try { user = userRepository.findById(userId).get(); }
+            catch (NoSuchElementException exception) { return ResponseEntity.badRequest().body("User not found"); }
+            String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            System.out.println(now);
+            Comment comment = new Comment();
+            comment.setContent(content);
+            comment.setUser(user);
+            comment.setDate(now);
+            mongoOperations.save(comment);
             movie.addComment(comment);
             movieRepository.save(movie);
             return ResponseEntity.ok().body("Thanks for comment!");
         } catch (NoSuchElementException exception) {
             return ResponseEntity.badRequest().body("Movie not found");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Something went wrong");
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

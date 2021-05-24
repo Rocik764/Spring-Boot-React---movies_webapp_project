@@ -52,7 +52,9 @@ public class AdminController {
                                             String title,
                                             String description,
                                             String category,
-                                            MultipartFile file) {
-        return ResponseEntity.ok(movieService.editMovie(id, title, description, category, file));
+                                            MultipartFile file,
+                                            @RequestParam(value = "directorsList[]") String[] directorsList,
+                                            String actorsList) throws JsonProcessingException {
+        return movieService.editMovie(id, title, description, category, file, directorsList, actorsList);
     }
 }

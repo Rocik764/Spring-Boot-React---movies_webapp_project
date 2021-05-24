@@ -1,8 +1,6 @@
 package com.example.springbootmongodb.model;
 
-import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document
 public class Rate {
 
     private int rate;

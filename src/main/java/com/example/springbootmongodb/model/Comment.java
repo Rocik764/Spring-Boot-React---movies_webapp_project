@@ -1,6 +1,7 @@
 package com.example.springbootmongodb.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
@@ -9,11 +10,11 @@ public class Comment {
     @Id
     private String id;
     private String content;
+    @DBRef
     private User user;
+    private String date;
 
-    public Comment(String content, User user) {
-        this.content = content;
-        this.user = user;
+    public Comment() {
     }
 
     public String getId() {
@@ -38,5 +39,13 @@ public class Comment {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 }

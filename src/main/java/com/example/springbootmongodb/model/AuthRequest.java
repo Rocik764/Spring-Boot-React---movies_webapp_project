@@ -4,22 +4,22 @@ import java.io.Serializable;
 
 public class AuthRequest implements Serializable {
 
-    private String name;
+    private String email;
     private String password;
 
-    public AuthRequest(String name, String password) {
-        this.name = name;
+    public AuthRequest(String email, String password) {
+        this.email = email;
         this.password = password;
     }
 
     public AuthRequest() {}
 
-    public String getName() {
-        return name;
+    public String getEmail() {
+        return email;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {

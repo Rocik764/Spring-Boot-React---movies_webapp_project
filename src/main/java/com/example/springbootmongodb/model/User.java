@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
@@ -15,18 +16,23 @@ public class User {
 
     @Id
     private String id;
+
     @NotNull
     @Size(min = 2, max = 255)
+    @Email
     @Indexed(unique = true)
-    private String name;
+    private String email;
+
     @NotNull
     @Size(min = 6, max = 255)
     private String password;
     private String roles;
+    private String verificationCode;
+    private boolean enabled;
 
-    public User(String id, String name, String password) {
+    public User(String id, String email, String password) {
         this.id = id;
-        this.name = name;
+        this.email = email;
         this.password = password;
     }
 
@@ -40,12 +46,12 @@ public class User {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getEmail() {
+        return email;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {
@@ -70,5 +76,21 @@ public class User {
         }
 
         return new ArrayList<>();
+    }
+
+    public String getVerificationCode() {
+        return verificationCode;
+    }
+
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

@@ -49,7 +49,7 @@ public class MovieController {
 
     @PostMapping("comment/{id}")
     public ResponseEntity<String> addComment(@PathVariable("id") String id,
-                                             @RequestParam("userId") String userId,
+                                             String userId,
                                              String content) {
         return movieService.addComment(id, userId, content);
     }

@@ -53,10 +53,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
 
                 .antMatchers(
-                        "/api/auth/login",
-                        "/api/auth/register",
+                        "/api/auth/**",
                         "/api/movie/list",
                         "/api/movie/list/**",
+                        "/api/movie/get/{id}",
                         "/api/file/**",
                         "/api/test/**")
                 .permitAll()

@@ -1,6 +1,7 @@
 package com.example.springbootmongodb.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ public class Movie {
     private String url;
     private String category;
     private List<Rate> rates = new ArrayList<>();
+    @DBRef
     private List<Comment> comments = new ArrayList<>();
     private List<Actor> actors = new ArrayList<>();
 
@@ -104,5 +106,13 @@ public class Movie {
 
     public void addActor(Actor actor) {
         this.actors.add(actor);
+    }
+
+    public void resetActors() {
+        this.actors = new ArrayList<>();
+    }
+
+    public void resetDirectors() {
+        this.directors = new ArrayList<>();
     }
 }
