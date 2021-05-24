@@ -87,7 +87,7 @@ function MovieDetails(props) {
     const comments = movie.comments.map((element, i) => {
         return (
             <ListGroup.Item key={i}>
-                <b>{element.user.name}</b> {element.date} <br/>{element.content}
+                <b>{element.user.email}</b> {element.date} <br/>{element.content}
             </ListGroup.Item>
         )
     })

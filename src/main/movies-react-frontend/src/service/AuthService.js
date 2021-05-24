@@ -3,10 +3,10 @@ const API_URL = "http://localhost:8080/api/auth/";
 
 class AuthService {
 
-    login(name, password) {
+    login(email, password) {
         return axios
             .post(API_URL + "login", {
-                name,
+                email,
                 password
             })
             .then(response => {
@@ -23,17 +23,17 @@ class AuthService {
         localStorage.removeItem("movieId");
     }
 
-    register(name, password) {
+    register(email, password) {
         return axios.post(API_URL + "register",{
-                name: name,
+                email: email,
                 password: password
             }
         )
     }
 
-    // getCurrentUser() {
-    //     return JSON.parse(localStorage.getItem('user'));
-    // }
+    resend(link) {
+        return axios.get(link)
+    }
 }
 
 export default new AuthService();

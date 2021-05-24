@@ -2,8 +2,8 @@ import types from "./types";
 
 import AuthService from "../service/AuthService"
 
-export const register = (username, password) => (dispatch) => {
-    return AuthService.register(username, password).then(
+export const register = (email, password) => (dispatch) => {
+    return AuthService.register(email, password).then(
         (response) => {
             dispatch({
                 type: types.REGISTER_SUCCESS,
@@ -32,8 +32,8 @@ export const register = (username, password) => (dispatch) => {
     );
 };
 
-export const login = (username, password) => (dispatch) => {
-    return AuthService.login(username, password).then(
+export const login = (email, password) => (dispatch) => {
+    return AuthService.login(email, password).then(
         (data) => {
             dispatch({
                 type: types.LOGIN_SUCCESS,
@@ -43,7 +43,7 @@ export const login = (username, password) => (dispatch) => {
             return Promise.resolve();
         },
         (error) => {
-
+            console.log(error.response.data)
             dispatch({
                 type: types.LOGIN_FAIL,
             });

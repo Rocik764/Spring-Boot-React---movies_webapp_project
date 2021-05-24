@@ -3,15 +3,16 @@ import {Form, Button, Col, Row, Container} from 'react-bootstrap'
 import { connect } from "react-redux";
 import { register } from "../../actions/auth";
 import {Link} from "react-router-dom";
+import AuthService from "../../service/AuthService";
 
 function Register(props) {
 
-    const [name, setName] = useState('')
+    const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [successful, setSuccessful] = useState(0)
 
-    const handleName = e => {
-        setName(e.target.value)
+    const handleEmail = e => {
+        setEmail(e.target.value)
     }
 
     const handlePassword = e => {
@@ -20,7 +21,7 @@ function Register(props) {
 
     const handleSubmit = e => {
         e.preventDefault()
-        props.dispatch(register(name, password)).then(
+        props.dispatch(register(email, password)).then(
             () => {
                 setSuccessful(1)
             })
@@ -29,7 +30,15 @@ function Register(props) {
             })
     }
 
+    const handleResend = link => {
+        AuthService.resend(link).then(response => {
+            alert(response.data)
+        })
+    };
+
     const { message } = props;
+    let splitted;
+
     return (
         <Container>
             <Row className="pt-5">
@@ -38,8 +47,8 @@ function Register(props) {
                         <h1>Register</h1>
                         <Form onSubmit={handleSubmit}>
                             <Form.Group>
-                                <Form.Label>Name</Form.Label>
-                                <Form.Control type="text" placeholder="Enter name" value={name} onChange={handleName} />
+                                <Form.Label>Email</Form.Label>
+                                <Form.Control type="email" placeholder="Enter email" value={email} onChange={handleEmail} />
                             </Form.Group>
 
                             <Form.Group>
@@ -52,13 +61,24 @@ function Register(props) {
                         </Form>
                         {message && (
                             <div className={successful ? "alert alert-success" : "alert alert-danger"} role="alert">
-                                {message.messages ? (
-                                     message.messages.map((value, index) => {
-                                         return <li key={index}>{value}</li>
-                                     })
-                                ) : (
-                                    <>{message} <Link to={"/login"}>Click here to login.</Link></>
-                                )}
+                                {(function() {
+                                    if(message.messages) {
+                                        return (<div>
+                                            {message.messages.map((value, index) => (
+                                                <p key={index}>{value}</p>
+                                            ))}
+                                        </div>);
+                                    } else {
+                                        if(successful) {
+                                            splitted = message.split(';');
+                                            return <><p>{splitted[0]} </p>
+                                                <Button variant="outline-danger"
+                                                        onClick={() => handleResend(splitted[1])}>Resend</Button></>
+                                        } else {
+                                            return <p>{message}</p>
+                                        }
+                                    }
+                                })()}
                             </div>
                         )}
                     </div>
