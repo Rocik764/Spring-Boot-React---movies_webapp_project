@@ -6,11 +6,22 @@ import MovieCard from "../cards/MovieCard";
 export default function MainPage(props) {
 
     const [movies, setMovies] = useState()
+    const [mostCommented, setMostCommented] = useState()
 
     useEffect(() => {
-        MovieService.listMovies().then(
+        MovieService.listTopRated().then(
             response => {
                 setMovies(response.data)
+            },
+            error => {
+                console.log(error.response)
+            }
+        )
+
+        MovieService.listMostCommented().then(
+            response => {
+                setMostCommented(response.data.content)
+                console.log(response.data)
             },
             error => {
                 console.log(error.response)
@@ -30,6 +41,17 @@ export default function MainPage(props) {
         });
     }
 
+    let mostCommentedMovieCards = []
+    if(typeof mostCommented !== 'undefined') {
+        mostCommentedMovieCards = mostCommented.map((element, i) => {
+            return (
+                <Col xl={3} md={4} sm={6} key={i}>
+                    <MovieCard id={element.id} title={element.title} url={element.url} movie={element} />
+                </Col>
+            );
+        });
+    }
+
     return (
         <>
             <Container>
@@ -40,6 +62,9 @@ export default function MainPage(props) {
             </Container>
             <Container>
                 <h1 className="pt-5">Most commented</h1>
+                <Row className="pt-2">
+                    {mostCommentedMovieCards}
+                </Row>
             </Container>
         </>
     )

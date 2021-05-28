@@ -1,4 +1,4 @@
-package com.example.springbootmongodb.service;
+package com.example.springbootmongodb.service.user;
 
 import com.example.springbootmongodb.model.User;
 import com.example.springbootmongodb.respository.UserRepository;

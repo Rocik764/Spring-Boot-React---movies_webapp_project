@@ -1,15 +1,13 @@
-package com.example.springbootmongodb.service;
+package com.example.springbootmongodb.service.auth;
 
 import com.example.springbootmongodb.model.User;
 import com.example.springbootmongodb.respository.UserRepository;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
@@ -26,7 +24,6 @@ public class AuthService {
     }
 
     public ResponseEntity<String> save(User user, String siteURL) throws UnsupportedEncodingException, MessagingException {
-        System.out.println(user.getEmail());
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);

@@ -115,4 +115,8 @@ public class Movie {
     public void resetDirectors() {
         this.directors = new ArrayList<>();
     }
+
+    public String toString() {
+        return "Movie: " + this.title + "\nDescription: " + this.description;
+    }
 }

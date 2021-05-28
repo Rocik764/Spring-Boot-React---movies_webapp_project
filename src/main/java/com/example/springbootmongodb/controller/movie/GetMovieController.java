@@ -1,7 +1,6 @@
 package com.example.springbootmongodb.controller.movie;
 
 import com.mongodb.client.gridfs.model.GridFSFile;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;

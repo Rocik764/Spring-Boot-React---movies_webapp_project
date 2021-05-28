@@ -1,7 +1,7 @@
 package com.example.springbootmongodb.config;
 
 import com.example.springbootmongodb.filter.JwtRequestFilter;
-import com.example.springbootmongodb.service.CustomUserDetailsService;
+import com.example.springbootmongodb.service.user.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -54,15 +54,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .antMatchers(
                         "/api/auth/**",
-                        "/api/movie/list",
-                        "/api/movie/list/**",
-                        "/api/movie/get/{id}",
-                        "/api/file/**",
-                        "/api/test/**")
+                        "/api/movie/**",
+                        "/api/file/**")
                 .permitAll()
 
-                .antMatchers("/api/movie/add",
-                        "/api/movie/get/**")
+                .antMatchers("/api/user/movie/**")
                 .hasRole("USER")
 
                 .antMatchers("/api/admin/**")

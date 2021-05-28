@@ -2,8 +2,8 @@ package com.example.springbootmongodb.controller.movie;
 
 import com.example.springbootmongodb.model.Movie;
 import com.example.springbootmongodb.respository.MovieRepository;
-import com.example.springbootmongodb.service.MovieService;
-import org.springframework.http.ResponseEntity;
+import com.example.springbootmongodb.service.movie.MovieService;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -26,6 +26,16 @@ public class MovieController {
         return movieRepository.findAll();
     }
 
+    @GetMapping("mostCommented")
+    public Page<Movie> getMostCommented() {
+        return movieService.getMostCommented();
+    }
+
+    @GetMapping("topRated")
+    public List<Movie> getTopRated() {
+        return movieService.getTopRated();
+    }
+
     @GetMapping("list/{category}")
     public List<Movie> getMoviesByCategory(@PathVariable("category") String category) {
         return movieRepository.findByCategory(category);
@@ -38,19 +48,5 @@ public class MovieController {
         } catch (NoSuchElementException e) {
             return null;
         }
-    }
-
-    @PatchMapping("rate/{id}")
-    public ResponseEntity rateMovie(@PathVariable("id") String id,
-                                    @RequestParam("userId") String userId,
-                                    @RequestParam("rate") int rate) {
-        return movieService.rateMovie(id, userId, rate);
-    }
-
-    @PostMapping("comment/{id}")
-    public ResponseEntity<String> addComment(@PathVariable("id") String id,
-                                             String userId,
-                                             String content) {
-        return movieService.addComment(id, userId, content);
     }
 }

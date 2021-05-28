@@ -1,6 +1,6 @@
 package com.example.springbootmongodb.filter;
 
-import com.example.springbootmongodb.service.CustomUserDetailsService;
+import com.example.springbootmongodb.service.user.CustomUserDetailsService;
 import com.example.springbootmongodb.util.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.SignatureException;

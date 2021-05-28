@@ -4,8 +4,8 @@ import com.example.springbootmongodb.error.ErrorResponse;
 import com.example.springbootmongodb.model.AuthRequest;
 import com.example.springbootmongodb.model.AuthResponse;
 import com.example.springbootmongodb.model.User;
-import com.example.springbootmongodb.service.AuthService;
-import com.example.springbootmongodb.service.CustomUserDetailsService;
+import com.example.springbootmongodb.service.auth.AuthService;
+import com.example.springbootmongodb.service.user.CustomUserDetailsService;
 import com.example.springbootmongodb.user_details.CustomUserDetails;
 import com.example.springbootmongodb.util.JwtUtil;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -16,7 +16,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
@@ -58,7 +57,6 @@ public class AuthController {
         try {
             return authService.save(user, getSiteURL(request));
         } catch (DataIntegrityViolationException e) {
-            System.out.println(e.getMessage());
             return ResponseEntity.badRequest().body("User already exists");
         } catch (UnsupportedEncodingException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -69,8 +67,7 @@ public class AuthController {
 
     @RequestMapping(value = "login", method = RequestMethod.POST)
     public ResponseEntity<?> authenticate(@RequestBody AuthRequest authRequest,
-                                          HttpServletRequest request) throws Exception {
-        System.out.println(authRequest.getEmail());
+                                          HttpServletRequest request) {
         try{
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
@@ -79,7 +76,6 @@ public class AuthController {
             return ResponseEntity.badRequest()
                     .body("Bad credentials");
         } catch (DisabledException e) {
-            System.out.println(getSiteURL(request) + "/api/auth/resend/" + authRequest.getEmail());
             return ResponseEntity.badRequest()
                     .body("Your account is disabled, click the button below to resend verification email ;" +
                             getSiteURL(request) + "/api/auth/resend/" + authRequest.getEmail());
