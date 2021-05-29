@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Col, Container, Form, InputGroup, Row } from "react-bootstrap";
+import {Alert, Button, Col, Container, Form, InputGroup, Row} from "react-bootstrap";
 import AdminMovieService from "../../service/admin/AdminMovieService";
 
 export default function EditMovies(props) {
@@ -11,8 +11,9 @@ export default function EditMovies(props) {
     const [category, setCategory] = useState(movie.category)
     const [file, setFile] = useState(movie.file)
     const [url, setUrl] = useState(movie.url)
-    const [directorsList, setDirectorsList] = useState(movie.directors);
+    const [directorsList2, setDirectorsList] = useState(movie.directors);
     const [actorsList, setActorsList] = useState(movie.actors);
+    const [errors, setErrors] = useState([]);
 
     const handleTitle = e => {
         setTitle(e.target.value)
@@ -32,7 +33,7 @@ export default function EditMovies(props) {
 
     const handleInputChange = (e, index) => {
         const value = e.target.value;
-        const list = [...directorsList];
+        const list = [...directorsList2];
         list[index] = value;
         setDirectorsList(list);
     }
@@ -46,29 +47,63 @@ export default function EditMovies(props) {
 
     const handleSubmit = e => {
         e.preventDefault()
-        let formData = new FormData()
-        formData.append('id', id)
-        formData.append('title', title)
-        formData.append('description', description)
-        formData.append('category', category)
-        formData.append('file', file)
-        for (let i = 0; i < directorsList.length; i++) {
-            formData.append('directorsList[]', directorsList[i])
-        }
-        formData.append('actorsList', JSON.stringify(actorsList))
 
-        AdminMovieService.editMovie(formData).then(
-            () => {
-                props.history.push("/manageMovies");
-                window.location.reload();
-            }, error => {
-                console.log("XD")
-                alert(error.response.data)
+        let directorsList = []
+        directorsList2.forEach(item => {
+            directorsList.push(item);
+        });
+
+        let formData = new FormData();
+        formData.append("id", id);
+        formData.append("file", file);
+        formData.append('movieWrapper', new Blob([JSON.stringify({
+            "title": title,
+            "description": description,
+            "category": category,
+            "directorsList": directorsList,
+            "actorsList": actorsList
+        })], {
+            type: "application/json"
+        }));
+
+        AdminMovieService.editMovie(formData)
+            .then(response => {
+                if (response[0] !== 200) {
+                    if(response[1].errors) {
+                        setErrors(response[1].errors)
+                    } else {
+                        alert(response[1].error)
+                    }
+                } else {
+                    props.history.push("/manageMovies");
+                    window.location.reload();
+                }
             })
+            .catch(function (error) {
+                console.log(error)
+            });
+    }
+
+    let showErrors
+    if(typeof errors !== 'undefined') {
+        showErrors = errors.map((element, i) => {
+            return (
+                <p key={i}>{element}</p>
+            );
+        });
     }
 
     return (
         <Container>
+            {errors.length > 0 && (
+                <Row className="pt-4">
+                    <Col>
+                        <Alert variant="danger">
+                            {showErrors}
+                        </Alert>
+                    </Col>
+                </Row>
+            )}
             <Row className="pt-5">
                 <Col>
                     <img src={url} width={500} height={700} alt={title} />
@@ -100,8 +135,7 @@ export default function EditMovies(props) {
                             <Form.File id="file" label="Image" onChange={handleImage} />
                         </Form.Group>
                         <Form.Label className="pt-2">Directors</Form.Label>
-                        {directorsList.map((x, i) => {
-                            console.log(x)
+                        {directorsList2.map((x, i) => {
                             return (
                                 <div key={i}>
                                     <InputGroup className="mb-3">

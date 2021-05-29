@@ -4,9 +4,7 @@ import com.example.springbootmongodb.model.Actor;
 import com.example.springbootmongodb.model.Movie;
 import com.example.springbootmongodb.respository.MovieRepository;
 import com.example.springbootmongodb.respository.UserRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.bson.types.ObjectId;
@@ -15,26 +13,30 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
-public class AdminMovieService {
+public class AdminMoviesService {
 
     private final MovieRepository movieRepository;
     private final GridFsTemplate gridFsTemplate;
     private final UserRepository userRepository;
     private final MongoOperations mongoOperations;
+    private static final Gson gson = new Gson();
 
-    public AdminMovieService(MovieRepository movieRepository,
-                        GridFsTemplate gridFsTemplate,
-                        UserRepository userRepository,
-                        MongoOperations mongoOperations) {
+    public AdminMoviesService(MovieRepository movieRepository,
+                              GridFsTemplate gridFsTemplate,
+                              UserRepository userRepository,
+                              MongoOperations mongoOperations) {
         this.movieRepository = movieRepository;
         this.gridFsTemplate = gridFsTemplate;
         this.userRepository = userRepository;
@@ -48,20 +50,9 @@ public class AdminMovieService {
                                            String description,
                                            String category,
                                            MultipartFile file,
-                                           String[] directorsList,
-                                           String actorsList) throws JsonProcessingException {
-        if(title == null || title.isBlank()) return ResponseEntity.badRequest().body("Missing title");
-        if(description == null || description.isBlank()) return ResponseEntity.badRequest().body("Missing description");
-        if(file == null || file.isEmpty()) return ResponseEntity.badRequest().body("Missing file");
+                                           List<String> directorsList,
+                                           List<Actor> actorsList) {
         if(!checkExtension(file)) return ResponseEntity.badRequest().body("Only .png/.jpg/.jpeg allowed");
-        if(!checkCategory(category)) return ResponseEntity.badRequest().body("There's no such category");
-        if(directorsList == null) return ResponseEntity.badRequest().body("Please enter atleast 1 director");
-        if(actorsList == null || actorsList.isBlank()) return ResponseEntity.badRequest().body("Please enter atleast 1 actor");
-
-        Collection<Actor> deserializedActorsList = new ObjectMapper().readValue(
-                actorsList, new TypeReference<>() {
-                }
-        );
 
         try {
             Movie movie = new Movie();
@@ -69,13 +60,15 @@ public class AdminMovieService {
             movie.setDescription(description);
             movie.setCategory(category);
             for (String director : directorsList) movie.addDirector(director);
-            for (Actor actor : deserializedActorsList) movie.addActor(actor);
+            movie.setActors(actorsList);
             if (checkContext(title, file, movie)) return ResponseEntity.badRequest().body("File has no content");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
 
-        return ResponseEntity.ok("Movie uploaded successfully");
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(gson.toJson("Movie uploaded successfully"));
     }
 
     public ResponseEntity<String> editMovie(String id,
@@ -83,16 +76,10 @@ public class AdminMovieService {
                                             String description,
                                             String category,
                                             MultipartFile file,
-                                            String[] directorsList,
-                                            String actorsList) throws JsonProcessingException {
-        if(title == null || title.isBlank()) return ResponseEntity.badRequest().body("Missing title");
-        if(description == null || description.isBlank()) return ResponseEntity.badRequest().body("Missing description");
+                                            List<String> directorsList,
+                                            List<Actor> actorsList) {
         if(!checkCategory(category)) return ResponseEntity.badRequest().body("There's no such category");
 
-        Collection<Actor> deserializedActorsList = new ObjectMapper().readValue(
-                actorsList, new TypeReference<>() {
-                }
-        );
         try {
             Movie movie = movieRepository.findById(id).get();
             movie.setTitle(title);
@@ -101,7 +88,7 @@ public class AdminMovieService {
             movie.resetActors();
             movie.resetDirectors();
             for (String director : directorsList) movie.addDirector(director);
-            for (Actor actor : deserializedActorsList) movie.addActor(actor);
+            movie.setActors(actorsList);
             if(file == null || file.isEmpty()) {
                 movieRepository.save(movie);
             } else {
@@ -114,7 +101,10 @@ public class AdminMovieService {
             return ResponseEntity.badRequest().body("Movie not found");
         }
 
-        return ResponseEntity.ok("Movie updated successfully");
+        //return ResponseEntity.ok(gson.toJson("Movie updated successfully"));
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(gson.toJson("Movie updated successfully"));
     }
 
     public String deleteMovie(String id) {

@@ -1,43 +1,28 @@
 package com.example.springbootmongodb.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+@Getter
+@Setter
+@AllArgsConstructor
 @Document
 public class Actor {
 
+    @NotNull
+    @Size(min = 2, max = 255)
     private String name;
+
+    @NotNull
+    @Size(min = 2, max = 255)
     private String second_name;
+
+    @NotNull
+    @Size(min = 2, max = 255)
     private String role;
-
-    public Actor() {}
-
-    public Actor(String name, String second_name, String role) {
-        this.name = name;
-        this.second_name = second_name;
-        this.role = role;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSecond_name() {
-        return second_name;
-    }
-
-    public void setSecond_name(String second_name) {
-        this.second_name = second_name;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
 }

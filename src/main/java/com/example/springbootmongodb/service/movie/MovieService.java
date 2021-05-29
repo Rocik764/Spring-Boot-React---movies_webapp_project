@@ -8,10 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.stereotype.Service;
 import java.util.*;
@@ -34,7 +31,22 @@ public class MovieService {
         this.mongoOperations = mongoOperations;
     }
 
-    public Page<Movie> getMostCommented() {
+    public List<Movie> getMostCommented() {
+        AggregationOperation limit = Aggregation.limit(4);
+        ProjectionOperation projectionOperation = Aggregation.project().and("$comments").size().as("comments");
+        String query2 = "{ $sort: { comments:-1 }}";
+
+        TypedAggregation<Movie> aggregation = Aggregation.newAggregation(
+                Movie.class,
+                projectionOperation,
+                new CustomProjectAggregationOperation(query2),
+                limit
+        );
+
+        return getMoviesWithAggregation(aggregation);
+    }
+
+    public Page<Movie> getMostCommented2() {
         PageRequest request = PageRequest.of(0, 4, Sort.Direction.DESC, "comments");
         Page<Movie> movies = movieRepository.findAll(request);
         return movies;
@@ -52,16 +64,21 @@ public class MovieService {
                 limit
         );
 
+        return getMoviesWithAggregation(aggregation);
+    }
+
+    private List<Movie> getMoviesWithAggregation(TypedAggregation<Movie> aggregation) {
+
         AggregationResults<Movie> results =
                 mongoOperations.aggregate(aggregation, Movie.class);
 
-        List<Movie> topRatedMovies = new ArrayList<>();
+        List<Movie> mostCommentedMovies = new ArrayList<>();
         for(Movie movie : results.getMappedResults()) {
             String id = movie.getId();
             Movie movieById = movieRepository.findById(id).get();
-            topRatedMovies.add(movieById);
+            mostCommentedMovies.add(movieById);
         }
 
-        return topRatedMovies;
+        return mostCommentedMovies;
     }
 }

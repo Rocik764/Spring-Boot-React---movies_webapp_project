@@ -27,7 +27,7 @@ public class MovieController {
     }
 
     @GetMapping("mostCommented")
-    public Page<Movie> getMostCommented() {
+    public List<Movie> getMostCommented() {
         return movieService.getMostCommented();
     }
 

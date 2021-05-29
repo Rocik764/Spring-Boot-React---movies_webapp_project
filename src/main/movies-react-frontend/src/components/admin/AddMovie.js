@@ -1,6 +1,8 @@
 import React, {useState} from "react";
-import {Form, Button, Col, Row, Container, InputGroup} from 'react-bootstrap'
+import {Form, Button, Col, Row, Container, InputGroup, Alert} from 'react-bootstrap'
 import AdminMovieService from '../../service/admin/AdminMovieService'
+import authHeader from "../../service/AuthHeader";
+import axios from "axios";
 
 export default function AddMovie(props) {
 
@@ -8,8 +10,9 @@ export default function AddMovie(props) {
     const [description, setDescription] = useState('')
     const [file, setFile] = useState('')
     const [category, setCategory] = useState('Documentaries')
-    const [directorsList, setDirectorsList] = useState([{director:''}]);
+    const [directorsList2, setDirectorsList] = useState([{director:''}]);
     const [actorsList, setActorsList] = useState([{name:'', second_name: '', role: ''}]);
+    const [errors, setErrors] = useState([]);
 
     const handleTitle = e => {
         setTitle(e.target.value)
@@ -29,21 +32,21 @@ export default function AddMovie(props) {
 
     const handleInputChange = (e, index) => {
         const { name, value } = e.target;
-        const list = [...directorsList];
+        const list = [...directorsList2];
         list[index][name] = value;
         setDirectorsList(list);
     };
 
     // handle click event of the Remove button
     const handleRemoveClick = index => {
-        const list = [...directorsList];
+        const list = [...directorsList2];
         list.splice(index, 1);
         setDirectorsList(list);
     };
 
     // handle click event of the Add button
     const handleAddClick = () => {
-        setDirectorsList([...directorsList, {director: ''}]);
+        setDirectorsList([...directorsList2, {director: ''}]);
     };
 
     const handleActorsInputChange = (e, index) => {
@@ -67,29 +70,83 @@ export default function AddMovie(props) {
 
     const handleSubmit = e => {
         e.preventDefault()
-        let formData = new FormData()
-        formData.append('title', title)
-        formData.append('description', description)
-        formData.append('category', category)
-        formData.append('file', file)
-        for (let i = 0; i < directorsList.length; i++) {
-            formData.append('directorsList[]', directorsList[i].director)
-        }
-        formData.append('actorsList', JSON.stringify(actorsList))
 
-        AdminMovieService.addMovie(formData).then(
-            (response) => {
-                props.history.push("/list");
-                window.location.reload();
-            }, error => {
-                alert(error.response.data)
+        let directorsList = []
+        directorsList2.forEach(item => {
+            directorsList.push(item.director);
+        });
+
+        let formData = new FormData();
+        formData.append("file", file);
+        formData.append('movieWrapper', new Blob([JSON.stringify({
+            "title": title,
+            "description": description,
+            "category": category,
+            "directorsList": directorsList,
+            "actorsList": actorsList
+        })], {
+            type: "application/json"
+        }));
+
+
+        AdminMovieService.addMovie(formData)
+            .then(response => {
+                if (response[0] !== 200) {
+                    if(response[1].errors) {
+                        setErrors(response[1].errors)
+                    } else {
+                        alert(response[1].error)
+                    }
+                } else {
+                    props.history.push("/manageMovies");
+                    window.location.reload();
+                }
             })
+            .catch(function (error) {
+                console.log(error)
+            });
+
+        // fetch('http://localhost:8080/api/admin/add', {
+        //     method: 'post',
+        //     body: formData,
+        //     headers: authHeader()
+        // }).then(
+        //     (response) => {
+        //         console.log("bx")
+        //         console.log(response.body)
+        //         // props.history.push("/list");
+        //         // window.location.reload();
+        //     }, error => {
+        //         console.log("xd")
+        //         console.log(error)
+        //         // if(error.response.data.errors) {
+        //         //     setErrors(error.response.data.errors)
+        //         // }
+        //     })
+    }
+
+    let showErrors
+    if(typeof errors !== 'undefined') {
+        showErrors = errors.map((element, i) => {
+            return (
+                <p key={i}>{element}</p>
+            );
+        });
     }
 
     return (
         <Container>
             <Row className="pt-5">
                 <Col>
+                    {errors && (<>
+                        {(function() {
+                            if(errors.length>0) {
+                                return <Alert variant="danger">
+                                    {showErrors}
+                                </Alert>
+                            }
+                        })()}</>
+                    )}
                     <Form onSubmit={handleSubmit}>
                         <Form.Group>
                             <Form.Label>Title</Form.Label>
@@ -116,18 +173,18 @@ export default function AddMovie(props) {
                             <Form.File id="file" label="Image" onChange={handleImage} />
                         </Form.Group>
                         <Form.Label className="pt-2">Directors</Form.Label>
-                        {directorsList.map((x, i) => {
+                        {directorsList2.map((x, i) => {
                             return (
                                 <div key={i}>
                                 <InputGroup className="mb-3">
                                     <Form.Control name="director" type="text" placeholder="Enter director"
                                                   value={x.director} onChange={e => handleInputChange(e, i)} />
                                     <InputGroup.Append>
-                                        {directorsList.length !== 1 && <Button variant="outline-danger"
+                                        {directorsList2.length !== 1 && <Button variant="outline-danger"
                                                                                onClick={() => handleRemoveClick(i)}>Remove</Button>}
                                     </InputGroup.Append>
                                 </InputGroup>
-                                {directorsList.length - 1 === i && <Button variant="outline-secondary" onClick={handleAddClick}>Add director field</Button>}
+                                {directorsList2.length - 1 === i && <Button variant="outline-secondary" onClick={handleAddClick}>Add director field</Button>}
                                 </div>
                             );
                         })}

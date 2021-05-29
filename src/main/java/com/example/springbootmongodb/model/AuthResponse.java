@@ -1,22 +1,14 @@
 package com.example.springbootmongodb.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.io.Serializable;
 
+@Getter
+@AllArgsConstructor
 public class AuthResponse implements Serializable {
 
     private String jwt;
     private User user;
-
-    public AuthResponse(String jwt, User user) {
-        this.jwt = jwt;
-        this.user = user;
-    }
-
-    public String getJwt() {
-        return jwt;
-    }
-
-    public User getUser() {
-        return user;
-    }
 }

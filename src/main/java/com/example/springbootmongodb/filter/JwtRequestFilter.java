@@ -20,8 +20,8 @@ import java.io.IOException;
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
-    private final String TOKEN_EXPIRED = "Token expired";
-    private final String TOKEN_MISMATCH = "Token doesn't match";
+    private final String TOKEN_EXPIRED = "{\"error\":\"Token expired\"}";
+    private final String TOKEN_MISMATCH = "{\"error\":\"Token doesn't match\"}";
 
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;

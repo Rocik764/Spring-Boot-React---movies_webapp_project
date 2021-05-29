@@ -20,8 +20,7 @@ export default function MainPage(props) {
 
         MovieService.listMostCommented().then(
             response => {
-                setMostCommented(response.data.content)
-                console.log(response.data)
+                setMostCommented(response.data)
             },
             error => {
                 console.log(error.response)
