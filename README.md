@@ -6,7 +6,7 @@
 * [Used dependencies](#used-dependencies)
 * [Database structure](#database-structure)
 * [Endpoints and queries](#endpoints-and-queries)
-* [Application overview](#overview)
+* [Application overview](#application-overview)
 
 ## About project
 It's my first fullstack project using mongodb database together with Spring Boot. As a frontend, I've used React and Bootstrap.
