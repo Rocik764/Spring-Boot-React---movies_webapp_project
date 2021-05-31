@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 @Validated
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
-@RequestMapping("api/admin")
+@RequestMapping("api/admin/movies")
 public class AdminMoviesController {
 
     private final AdminMoviesService adminMoviesService;
@@ -22,11 +22,7 @@ public class AdminMoviesController {
     public AdminMoviesController(AdminMoviesService adminMoviesService) {
         this.adminMoviesService = adminMoviesService;
     }
-
-    /**
-     * response entity to odpowiedź HTTP, w której możemy kontrolować wszystko,
-     * np. headers, status code (kody odpowiedzi) oraz body w które wrzucamy jakiś obiekt np.
-     */
+    
     @RequestMapping(value="add", method = RequestMethod.POST, consumes = {"multipart/form-data"})
     public ResponseEntity addMovie(@RequestPart("movieWrapper") @Valid MovieWrapper movieWrapper,
                                    @RequestPart("file") @NotNull MultipartFile file) {

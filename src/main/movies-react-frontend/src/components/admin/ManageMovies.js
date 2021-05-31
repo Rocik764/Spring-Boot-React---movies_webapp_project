@@ -71,16 +71,6 @@ export default class ManageMovies extends React.Component {
         localStorage.setItem("movie", JSON.stringify(movie));
         history.push("/editMovie");
         window.location.reload();
-        // MovieService.getMovie(id).then(
-        //     (response) => {
-        //         localStorage.setItem("movie", JSON.stringify(response.data));
-        //         history.push("/editMovie");
-        //         window.location.reload();
-        //     },
-        //     (error) => {
-        //         alert(error.response.data)
-        //     }
-        // )
     }
 
     render() {
@@ -129,7 +119,7 @@ export default class ManageMovies extends React.Component {
         }
 
         return (
-            <Container>
+            <Container className="pb-5">
                 <Row className="pt-5">
                     <Col>
                         <Form.Group controlId="exampleForm.ControlSelect2">

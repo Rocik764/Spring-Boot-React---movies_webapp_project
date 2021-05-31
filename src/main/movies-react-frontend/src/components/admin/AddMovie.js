@@ -1,8 +1,6 @@
 import React, {useState} from "react";
 import {Form, Button, Col, Row, Container, InputGroup, Alert} from 'react-bootstrap'
 import AdminMovieService from '../../service/admin/AdminMovieService'
-import authHeader from "../../service/AuthHeader";
-import axios from "axios";
 
 export default function AddMovie(props) {
 
@@ -37,14 +35,12 @@ export default function AddMovie(props) {
         setDirectorsList(list);
     };
 
-    // handle click event of the Remove button
     const handleRemoveClick = index => {
         const list = [...directorsList2];
         list.splice(index, 1);
         setDirectorsList(list);
     };
 
-    // handle click event of the Add button
     const handleAddClick = () => {
         setDirectorsList([...directorsList2, {director: ''}]);
     };
@@ -56,14 +52,12 @@ export default function AddMovie(props) {
         setActorsList(list);
     };
 
-    // handle click event of the Remove button
     const handleActorsRemoveClick = index => {
         const list = [...actorsList];
         list.splice(index, 1);
         setActorsList(list);
     };
 
-    // handle click event of the Add button
     const handleActorsAddClick = () => {
         setActorsList([...actorsList, {name: '', second_name: '', role: ''}]);
     };
@@ -105,24 +99,6 @@ export default function AddMovie(props) {
             .catch(function (error) {
                 console.log(error)
             });
-
-        // fetch('http://localhost:8080/api/admin/add', {
-        //     method: 'post',
-        //     body: formData,
-        //     headers: authHeader()
-        // }).then(
-        //     (response) => {
-        //         console.log("bx")
-        //         console.log(response.body)
-        //         // props.history.push("/list");
-        //         // window.location.reload();
-        //     }, error => {
-        //         console.log("xd")
-        //         console.log(error)
-        //         // if(error.response.data.errors) {
-        //         //     setErrors(error.response.data.errors)
-        //         // }
-        //     })
     }
 
     let showErrors
@@ -135,7 +111,7 @@ export default function AddMovie(props) {
     }
 
     return (
-        <Container>
+        <Container className="pb-5">
             <Row className="pt-5">
                 <Col>
                     {errors && (<>

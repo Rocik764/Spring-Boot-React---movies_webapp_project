@@ -1,27 +1,41 @@
-import React from "react";
-import {Form, Button, Col, Row, Accordion, Card, Table, Container} from 'react-bootstrap'
-import MovieService from "../../service/MovieService";
-import AdminMovieService from "../../service/admin/AdminMovieService";
-import {history} from "../../helpers/history";
+import React, {useEffect, useState} from "react";
+import {Button, Col, Container, Row, Table, Modal, Form} from 'react-bootstrap'
+import AdminService from "../../service/admin/AdminService";
 
-export default class ManageUsers extends React.Component {
+export default function ManageUsers(props) {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            movies: []
-        };
+    const [users, setUsers] = useState()
+    const [id, setId] = useState()
+    const [email, setEmail] = useState()
+    const [showModal, setShowModal] = useState(false)
 
-        this.handleCategory = this.handleCategory.bind(this);
-        this.deleteMovie = this.deleteMovie.bind(this);
+    useEffect(() => {
+        AdminService.getUsersList().then(
+            response => {
+                setUsers(response.data)
+            },
+            error => {
+                console.log(error.response)
+            }
+        )
+    }, [])
+
+    const handleClose = () => setShowModal(false);
+    const handleShow = (id, email) => {
+        setId(id)
+        setEmail(email)
+        setShowModal(true);
     }
 
-    componentDidMount() {
-        MovieService.listMovies().then(
-            response => {
-                this.setState({
-                    movies: response.data
-                })
+    const handleEmail = e => {
+        setEmail(e.target.value)
+    }
+
+    const handleSubmit = e => {
+        e.preventDefault()
+        AdminService.setNewEmail(id, email).then(
+            () => {
+                window.location.reload();
             },
             error => {
                 console.log(error.response)
@@ -29,133 +43,91 @@ export default class ManageUsers extends React.Component {
         )
     }
 
-    handleCategory(event) {
-        if(event.target.value === 'All') {
-            MovieService.listMovies().then(
-                response => {
-                    this.setState({
-                        movies: response.data
-                    })
-                },
-                error => {
-                    console.log(error.response)
-                }
-            )
-        }
-        else {
-            MovieService.listMoviesByCategory(event.target.value).then(
-                response => {
-                    this.setState({
-                        movies: response.data
-                    })
-                },
-                error => {
-                    console.log(error.response)
-                }
-            )
-        }
-    }
-
-    deleteMovie(id) {
-        AdminMovieService.deleteMovie(id).then(
-            response => {
+    const setAdmin = id => {
+        AdminService.setAdmin(id).then(
+            () => {
                 window.location.reload();
             },
             error => {
-                alert(error.response.data)
+                console.log(error.response)
             }
         )
     }
 
-    setMovie(movie) {
-        localStorage.setItem("movie", JSON.stringify(movie));
-        history.push("/editMovie");
-        window.location.reload();
-        // MovieService.getMovie(id).then(
-        //     (response) => {
-        //         localStorage.setItem("movie", JSON.stringify(response.data));
-        //         history.push("/editMovie");
-        //         window.location.reload();
-        //     },
-        //     (error) => {
-        //         alert(error.response.data)
-        //     }
-        // )
+    const unsetAdmin = id => {
+        AdminService.unsetAdmin(id).then(
+            () => {
+                window.location.reload();
+            },
+            error => {
+                console.log(error.response)
+            }
+        )
     }
 
-    render() {
+    let usersList = []
+    if(typeof users !== 'undefined') {
+        usersList = users.map((element, i) => {
+            let button
+            if (element.roles.includes(',ADMIN')) {
+                button = <Button variant="danger" onClick={() => unsetAdmin(element.id)}>Unset admin</Button>
+            } else {
+                button = <Button variant="danger" onClick={() => setAdmin(element.id)}>Set admin</Button>
+            }
+            return (
+                <tr key={i}>
+                    <td>{element.id}</td>
+                    <td>{element.email}</td>
+                    <td>{element.roles}</td>
+                    <td>{element.enabled ? 'enabled' : 'disabled'}</td>
+                    <td>
+                        {button}
+                        <Button variant="primary" onClick={() => handleShow(element.id, element.email)}>Change email</Button>
+                    </td>
+                </tr>
+            );
+        });
+    }
 
-        let movies = []
-        if(typeof this.state.movies !== 'undefined') {
-            movies = this.state.movies.map((element, i) => {
-                i++
-                return (
-                    <Card key={i++}>
-                        <Card.Header>
-                            <Accordion.Toggle as={Button} variant="link" eventKey={i}>
-                                {element.title}
-                            </Accordion.Toggle>
-                        </Card.Header>
-                        <Accordion.Collapse eventKey={i}>
-                            <Card.Body>
-                                <Table responsive>
-                                    <thead>
-                                    <tr>
-                                        <th>Title</th>
-                                        <th>Description</th>
-                                        <th>Category</th>
-                                        <th>Image</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr>
-                                        <td>{element.title}</td>
-                                        <td>{element.description}</td>
-                                        <td>{element.category}</td>
-                                        <td><img src={element.url} alt={element.title} width={100} height={100}/></td>
-                                        <td>
-                                            <Button variant="danger" onClick={() => this.setMovie(element)}>Edit</Button>
-                                            <Button variant="danger" onClick={() => this.deleteMovie(element.id)}>Delete</Button>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </Table>
-                            </Card.Body>
-                        </Accordion.Collapse>
-                    </Card>
-                );
-            });
-        }
-
-        return (
-            <Container>
-                <Row className="pt-5">
+    return (
+        <>
+            <Container className="pb-5">
+                <h1 className="pt-5">Users list</h1>
+                <Row className="pt-2">
                     <Col>
-                        <Form.Group controlId="exampleForm.ControlSelect2">
-                            <Form.Label>Category</Form.Label>
-                            <Form.Control as="select" value={this.state.category} onChange={this.handleCategory}>
-                                <option value="All">All</option>
-                                <option value="Documentaries">Documentaries</option>
-                                <option value="Family">Family</option>
-                                <option value="Fantasy">Fantasy</option>
-                                <option value="Horror">Horror</option>
-                                <option value="Comedies">Comedies</option>
-                                <option value="Action & Adventure">Action & Adventure</option>
-                                <option value="Romantic">Romantic</option>
-                                <option value="Dramas">Dramas</option>
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col>
-                        <Accordion defaultActiveKey="0">
-                            {movies}
-                        </Accordion>
+                        <Table responsive="sm">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Roles</th>
+                                <th>Enabled</th>
+                                <th>Manage</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                {usersList}
+                            </tbody>
+                        </Table>
                     </Col>
                 </Row>
             </Container>
-        )
-    }
+            <Modal show={showModal} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Change email</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleSubmit}>
+                        <Form.Group>
+                            <Form.Label>Email</Form.Label>
+                            <Form.Control type="text" placeholder="New email" value={email} onChange={handleEmail} />
+                        </Form.Group>
+                        <Button variant="primary" type="submit">
+                            Submit
+                        </Button>
+                    </Form>
+                </Modal.Body>
+            </Modal>
+        </>
+    )
 }

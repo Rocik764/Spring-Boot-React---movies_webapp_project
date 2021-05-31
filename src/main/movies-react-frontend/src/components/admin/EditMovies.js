@@ -94,7 +94,7 @@ export default function EditMovies(props) {
     }
 
     return (
-        <Container>
+        <Container className="pb-5">
             {errors.length > 0 && (
                 <Row className="pt-4">
                     <Col>

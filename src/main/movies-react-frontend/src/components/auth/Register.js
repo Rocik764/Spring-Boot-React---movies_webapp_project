@@ -2,7 +2,6 @@ import React, {useState} from "react";
 import {Form, Button, Col, Row, Container} from 'react-bootstrap'
 import { connect } from "react-redux";
 import { register } from "../../actions/auth";
-import {Link} from "react-router-dom";
 import AuthService from "../../service/AuthService";
 
 function Register(props) {
@@ -40,7 +39,7 @@ function Register(props) {
     let splitted;
 
     return (
-        <Container>
+        <Container className="pb-5">
             <Row className="pt-5">
                 <Col>
                     <div className="login-register-form">

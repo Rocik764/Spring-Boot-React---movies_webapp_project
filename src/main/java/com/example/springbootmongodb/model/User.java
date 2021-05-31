@@ -24,13 +24,13 @@ public class User {
     private String id;
 
     @NotNull
-    @Size(min = 2, max = 255)
+    @Size(min = 2, max = 255, message = "Email field must be between {min} and {max} characters long")
     @Email
     @Indexed(unique = true)
     private String email;
 
     @NotNull
-    @Size(min = 6, max = 255)
+    @Size(min = 6, max = 255, message = "Password field must be between {min} and {max} characters long")
     private String password;
     private String roles;
     private String verificationCode;

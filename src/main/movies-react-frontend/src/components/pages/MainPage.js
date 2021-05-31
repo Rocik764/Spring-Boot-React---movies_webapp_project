@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Col, Container, Row} from 'react-bootstrap'
+import {Col, Container, Form, Row} from 'react-bootstrap'
 import MovieService from '../../service/MovieService'
 import MovieCard from "../cards/MovieCard";
 
@@ -53,13 +53,11 @@ export default function MainPage(props) {
 
     return (
         <>
-            <Container>
+            <Container className="pb-5">
                 <h1 className="pt-5">Top rated</h1>
                 <Row className="pt-2">
                     {movieCards}
                 </Row>
-            </Container>
-            <Container>
                 <h1 className="pt-5">Most commented</h1>
                 <Row className="pt-2">
                     {mostCommentedMovieCards}

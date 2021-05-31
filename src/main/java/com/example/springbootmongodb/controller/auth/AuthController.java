@@ -51,6 +51,7 @@ public class AuthController {
                                       HttpServletRequest request) {
         if (bindingResult.hasErrors()) {
             List<String> errors = bindingResult.getAllErrors().stream().map(e -> e.getDefaultMessage()).collect(Collectors.toList());
+            for (String error : errors) System.out.println(error);
             return ResponseEntity.badRequest()
                     .body(new ErrorResponse("400", "Validation failure", errors));
         }

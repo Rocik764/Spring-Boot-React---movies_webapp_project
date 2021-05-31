@@ -1,7 +1,7 @@
 import axios from "axios";
 import authHeader from '../AuthHeader';
 
-const API_URL = 'http://localhost:8080/api/admin/'
+const API_URL = 'http://localhost:8080/api/admin/movies/'
 
 class AdminMovieService {
 

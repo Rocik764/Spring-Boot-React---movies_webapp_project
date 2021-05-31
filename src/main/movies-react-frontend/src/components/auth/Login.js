@@ -42,7 +42,7 @@ function Login(props) {
     }
 
     return (
-        <Container>
+        <Container className="pb-5">
             <Row className="pt-5">
                 <Col>
                     <div className="login-register-form">

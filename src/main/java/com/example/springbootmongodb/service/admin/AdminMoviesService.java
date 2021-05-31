@@ -110,11 +110,9 @@ public class AdminMoviesService {
     public String deleteMovie(String id) {
         try {
             Movie movie = movieRepository.findById(id).get();
-
             String movieId = movie.getUrl().split(hyperLink + "api/file/movies/")[1];
             gridFsTemplate.delete(new Query(Criteria.where("_id").is(movieId)));
             movieRepository.deleteById(id);
-
         } catch (NoSuchElementException exception) {
             return "Movie not found";
         } catch (Exception e) {

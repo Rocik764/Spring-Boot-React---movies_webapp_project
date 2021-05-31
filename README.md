@@ -6,10 +6,14 @@
 * [Used dependencies](#used-dependencies)
 * [Database structure](#database-structure)
 * [Endpoints and queries](#endpoints-and-queries)
-* [Overview](#overview)
+* [Application overview](#overview)
 
 ## About project
-...
+It's my first fullstack project using mongodb database together with Spring Boot. As a frontend, I've used React and Bootstrap.
+The project is a forum for users where they can comment and rate different movies added by administrators. Users have to register and confirm email, 
+I've used JavaMailSender interface provided by Spring starter module to send confirmation email. 
+After successful registration users are able to post comments and rate from 1 to 5 under specific movie.<br/>
+In the table under Endpoint and queries section, I included example queries that could be used to perform actions executed by Spring.
 
 ## Technologies
 * Spring Boot
@@ -59,9 +63,12 @@
     "url": "<string>",
     "category": "<string>",
     "rates": [
-        { 
-            "$ref": "<users_collection>", 
-            "$id": "<ObjectId>"
+        {
+            "rate": "<int>",
+            "user": {
+                "$ref": "<users_collection>", 
+                "$id": "<ObjectId>"
+            }
         }
     ],
     "comments": [
@@ -85,7 +92,7 @@
     "_id": "<ObjectId>",
     "content": "<string>",
     "user": { 
-        "$ref": "<collection>", 
+        "$ref": "<users_collection>", 
         "$id": "<ObjectId>" 
     },
     "date": "<date>"
@@ -96,21 +103,24 @@
 
 ## Endpoints and queries
 | Method | Endpoint  | Action | mongoDB query | 
-| --- |:-----:|:-----:|:-----:|
+| --- |:---:|:---:|:-----:|
 |GET|api/movie/list|return list of all movies|db.movies.find()|
-|GET|api/movie/mostCommented|return limited list of 4 movies with the most comments|db.movies.find().sort({comments: -1}).limit(1)|
-|GET|api/movie/topRated|return limited list of 4 movies with the highest average rates|db.movies.aggregate([{ $project: { avg: { $avg: "$rates.rate"} } }, { $sort: { avg:-1 }}, { $limit:4 }])|
-|GET|api/movie/list/{category}|return list of movies by category|db.movies.find({ "category":"<some_category>" })|
-|GET|api/movie/get/{id}|return movie by id|db.movies.find({ _id:ObjectId("60abcbab3809ac0bc0debe4c") })|
-|POST|api/auth/register|user registration|db.users.insertOne({email:"<some_email>", password:"<hashed_password>", roles:"USER", verificationCode:"<64_characters_long_random_string>", enabled:false})|
-|POST|api/auth/login|user login|db.users.findOne({ "email":"<some_email>" })|
-|GET|api/auth/verify|user's email verification to enable his account|db.users.update({ verificationCode:"<64_characters_long_random_string>" }, { $unset: {verificationCode:1}, $set: { enabled: true }})|
+|GET|api/movie/mostCommented|return limited list of 4 movies with the most comments|db.movies.aggregate([{ "$project" : { "comments" : { "$size" : ["$comments"] }}}, { "$sort" : { "comments" : -1 }}, { "$limit" : 4 }])|
+|GET|api/movie/topRated|return limited list of 4 movies with the highest average rate|db.movies.aggregate([{ $project: { avg: { $avg: "$rates.rate" }}}, { $sort: { avg:-1 }}, { $limit:4 }])|
+|GET|api/movie/list/{category}|return list of movies by category|db.movies.find({ "category":"<value>" })|
+|GET|api/movie/get/{id}|return movie by id|db.movies.find({ _id:ObjectId("<id>") })|
+|POST|api/auth/register|user registration|db.users.insertOne({ email:"<value>", password:"<hashed_value>", roles:"USER", verificationCode:"<64_characters_long_random_string>", enabled:false })|
+|POST|api/auth/login|user login|db.users.findOne({ "email":"<value>" })|
+|GET|api/auth/verify|user's email verification to enable his account|db.users.update({ verificationCode:"<64_characters_long_random_string>" }, { $unset: { verificationCode:1 }, $set: { enabled: true }})|
 |GET|api/auth/resend/{email}|resend email with verification link to a given user's email||
-|PATCH|api/user/movie/rate/{id}|add or change user's rate to a specific movie (1 per movie)|db.users.findOne({ "email":"some_email" })|
-|POST|api/user/movie/comment/{id}|add user's comment to a specific movie|db.comment.insertOne({content:"comment", user: new DBRef('users','<user_id>'), date:'2021-05-28 21:42:40'}) / db.movies.update({ _id:ObjectId("<movie_id>") }, { $push: { comments: new DBRef('comment','<comment_id>') }})|
-|POST|api/admin/add|add new movie|db.movies.insertOne({title:"title", description:"description", directors:["director"], url:"url", category:"category", rates:[{}], comments:[{}], actors:[{name:"name",second_name:"second_name",role:"role"}]})|
-|DELETE|api/admin/delete/{id}|delete existing movie and any of it's files|db.movies.insertOne({title:"title", description:"description", directors:["director"], url:"url", category:"category", rates:[{}], comments:[{}], actors:[{name:"name",second_name:"second_name",role:"role"}]})|
-|PATCH|api/admin/editMovie/{id}|edit existing movie|db.movies.updateOne({_id:ObjectId("<id>")}, {$set: {<field>:"<value>"}})|
+|PATCH|api/user/movie/rate/{id}|add or change user's rate to a specific movie (1 per movie)|db.movies.updateOne({ _id:ObjectId("<id>") }, { $push: { rates: { rate:<value>, user: new DBRef('users','<id>') }}})|
+|POST|api/user/movie/comment/{id}|add user's comment to a specific movie|db.comment.insertOne({ content:"<value>", user: new DBRef('users','<id>'), date:'<value>' }) / db.movies.update({ _id:ObjectId("<id>") }, { $push: { comments: new DBRef('comment','<id>') }})|
+|POST|api/admin/movies/add|add new movie|db.movies.insertOne({ title:"<value>", description:"<value>", directors:["<value>"], url:"<url_with_id_to_gridfs_file>", category:"<value>", rates:[{}], comments:[{}], actors:[{ name:"<value>", second_name:"<value>", role:"<value>" }]})|
+|DELETE|api/admin/movies/delete/{id}|delete existing movie and any of it's files|db.test_users.deleteOne({ "_id":ObjectId("<id>") })|
+|PATCH|api/admin/movies/editMovie/{id}|edit existing movie|db.movies.updateOne({ _id:ObjectId("<id>") }, { $set: { <field>:"<value>" }})|
+|GET|api/admin/users/list|return list of all users|db.users.find()|
+|PATCH|api/admin/users/editMail/{id}|edit user's mail and disable his account so he has to confirm it again|db.users.updateOne({ _id:ObjectId("<id>") }, { $set: { email:"<value>", enabled: false, verificationCode:"<64_characters_long_random_string>" }})|
+|PATCH|api/admin/users/setAdmin/{id}|add ADMIN role to a specific user|db.users.updateOne({ _id:ObjectId("<id>") }, { $set: { role: "USER,ADMIN" }})|
+|PATCH|api/admin/users/unsetAdmin/{id}|remove ADMIN role from a specific user|db.users.updateOne({ _id:ObjectId("<id>") }, { $set: { role:"USER" }})|
 
-## Overview
-...
+## Application overview

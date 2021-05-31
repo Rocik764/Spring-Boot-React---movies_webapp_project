@@ -56,34 +56,3 @@
 .movie-card-container:hover img {
     transform: scale(1);
 }
-
-/**
-    Movies cards modal
- */
-.modal-content {
-    background-color: #243b55 !important;
-}
-
-.movie-modal-title {
-    color: #fff;
-    font-size: 2rem;
-    text-transform: uppercase;
-    font-weight: 400;
-}
-
-.movie-modal-title::before {
-    content: "";
-    position: absolute;
-    top: 3rem;
-    left: 0;
-    height: 5px;
-    width: 100%;
-    background: rgba(3, 127, 255, 0.3);
-}
-
-.movie-modal-container p {
-    color: #fff;
-    margin-top: 2rem;
-    font-size: 1.5rem;
-    font-weight: 300;
-}

@@ -6,10 +6,16 @@ import com.example.springbootmongodb.model.Rate;
 import com.example.springbootmongodb.model.User;
 import com.example.springbootmongodb.respository.MovieRepository;
 import com.example.springbootmongodb.respository.UserRepository;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.NoSuchElementException;
@@ -76,6 +82,20 @@ public class UserMovieService {
             return ResponseEntity.badRequest().body("Movie not found");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    public boolean editUserPassword(String userId, String oldPassword, String newPassword) {
+        User user = userRepository.findById(userId).get();
+
+        if (BCrypt.checkpw(oldPassword, user.getPassword())){
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            user.setPassword(encodedPassword);
+            userRepository.save(user);
+            return true;
+        } else {
+            return false;
         }
     }
 }

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {Button, Col, Container, Form, Row, Table, ListGroup} from 'react-bootstrap'
 import {connect} from "react-redux";
 import MovieService from "../../service/MovieService";
@@ -14,11 +14,9 @@ function MovieDetails(props) {
         let finalRate = 0
         for(let i = 0; movie.rates.length > i; i++) {
             finalRate += movie.rates[i].rate
-            console.log(movie.rates[i].rate)
         }
         finalRate = finalRate / movie.rates.length
         setRate(finalRate)
-        console.log(finalRate)
     }, [])
 
     const handleComment = e => {
@@ -26,6 +24,10 @@ function MovieDetails(props) {
     }
 
     const onStarClick = e => {
+        if(!props.user) {
+            alert("You must be logged in to do that")
+            return ;
+        }
         MovieService.rateMovie(movie.id, props.user.user.id, rate).then(
             (response) => {
                 alert(response.data)
@@ -57,11 +59,8 @@ function MovieDetails(props) {
                         alert(error.response.data)
                     }
                 )
-                console.log("xd")
-                //window.location.reload();
             },
             (error) => {
-                console.log("bx")
                 alert(error.response.data)
             }
         );
@@ -93,7 +92,7 @@ function MovieDetails(props) {
     })
 
     return (
-        <Container>
+        <Container className="pb-5">
             <Row className="pt-5">
                 <Col md={6}>
                     <img className="movie-image" src={movie.url} alt={movie.title} />
@@ -147,19 +146,23 @@ function MovieDetails(props) {
                     </ListGroup>) : ( <p>No comments yet</p>)}
                 </Col>
             </Row>
-            <Row className="pt-3">
-                <Col>
-                    <Form onSubmit={handleSubmit}>
-                        <Form.Group>
-                            <Form.Label>Add comment</Form.Label>
-                            <Form.Control as="textarea" rows={3} value={comment} onChange={handleComment} />
-                        </Form.Group>
-                        <Button variant="primary" type="submit">
-                            Post comment
-                        </Button>
-                    </Form>
-                </Col>
-            </Row>
+            {props.user ? (
+                <Row className="pt-3">
+                    <Col>
+                        <Form onSubmit={handleSubmit}>
+                            <Form.Group>
+                                <Form.Label>Add comment</Form.Label>
+                                <Form.Control as="textarea" rows={3} value={comment} onChange={handleComment} />
+                            </Form.Group>
+                            <Button variant="primary" type="submit">
+                                Post comment
+                            </Button>
+                        </Form>
+                    </Col>
+                </Row>
+            ) : (
+                <></>
+            )}
         </Container>
     )
 }

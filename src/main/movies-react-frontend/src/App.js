@@ -4,20 +4,18 @@ import {Navbar, Nav, Container, NavDropdown} from "react-bootstrap";
 import React, {Component} from "react";
 import { Router, Link, Switch, Route } from "react-router-dom";
 import { connect } from "react-redux";
-
 import AddMovie from './components/admin/AddMovie'
-import MoviesList from "./components/movies_list/MoviesList";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import ManageMovies from "./components/admin/ManageMovies";
 import EditMovies from "./components/admin/EditMovies";
-
 import { clearMessage } from "./actions/message";
 import { logout } from "./actions/auth";
-
 import { history } from './helpers/history'
 import MainPage from "./components/pages/MainPage";
 import MovieDetails from "./components/pages/MovieDetails";
+import ManageUsers from "./components/admin/ManageUsers";
+import MoviesList from "./components/pages/MoviesList";
 
 class App extends Component {
     constructor(props) {
@@ -67,7 +65,7 @@ class App extends Component {
                                 {showAdminBoard ? (
                                     <NavDropdown title="ADMIN" id="basic-nav-dropdown">
                                         <NavDropdown.Item as={Link} to={"/manageMovies"}>Edit movies</NavDropdown.Item>
-                                        <NavDropdown.Item as={Link} to={"/addMovie"}>Edit users</NavDropdown.Item>
+                                        <NavDropdown.Item as={Link} to={"/manageUsers"}>Edit users</NavDropdown.Item>
                                         <NavDropdown.Divider />
                                         <NavDropdown.Item as={Link} to={"/addMovie"}>Add movie</NavDropdown.Item>
                                     </NavDropdown>
@@ -110,6 +108,7 @@ class App extends Component {
                         <>
                             <Route exact path="/addMovie" component={AddMovie} />
                             <Route exact path="/manageMovies" component={ManageMovies} />
+                            <Route exact path="/manageUsers" component={ManageUsers} />
                             <Route exact path='/editMovie' component={EditMovies} />
                         </>
                         ) : (<></>)}
