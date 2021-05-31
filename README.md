@@ -124,3 +124,4 @@ In the table under Endpoint and queries section, I included example queries that
 |PATCH|api/admin/users/unsetAdmin/{id}|remove ADMIN role from a specific user|db.users.updateOne({ _id:ObjectId("<id>") }, { $set: { role:"USER" }})|
 
 ## Application overview
+[![Watch the video]](https://youtu.be/eZETqxR8qi8)
